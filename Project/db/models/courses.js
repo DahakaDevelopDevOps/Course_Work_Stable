@@ -1,0 +1,40 @@
+module.exports = function(sequelize, DataTypes) {
+    return sequelize.define('Courses', {
+      course_id: {
+        type: DataTypes.INTEGER,
+        primaryKey: true,
+        autoIncrement: true
+      },
+      course_name: {
+        type: DataTypes.STRING(50),
+        allowNull: false
+      },
+      description: {
+        type: DataTypes.STRING(500)
+      },
+      instructor_id: {
+        type: DataTypes.INTEGER,
+        allowNull: false
+      },
+      start_date: {
+        type: DataTypes.DATE,
+        allowNull: false
+      },
+      end_date: {
+        type: DataTypes.DATE,
+        allowNull: false
+      },
+      course_type_id: {
+        type: DataTypes.INTEGER,
+        allowNull: false
+      },
+      other_details: {
+        type: DataTypes.STRING(1000)
+      }
+    }, {
+      sequelize,
+      tableName: 'Courses',
+      timestamps: false
+    });
+  };
+  
