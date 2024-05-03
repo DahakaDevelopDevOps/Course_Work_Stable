@@ -6,15 +6,11 @@ module.exports = function(sequelize, DataTypes) {
         autoIncrement: true
       },
       course_name: {
-        type: DataTypes.STRING(50),
+        type: DataTypes.STRING(250),
         allowNull: false
       },
       description: {
         type: DataTypes.STRING(500)
-      },
-      instructor_id: {
-        type: DataTypes.INTEGER,
-        allowNull: false
       },
       start_date: {
         type: DataTypes.DATE,

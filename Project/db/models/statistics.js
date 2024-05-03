@@ -1,6 +1,6 @@
 module.exports = function(sequelize, DataTypes) {
-    return sequelize.define('CourseRegistrations', {
-      registration_id: {
+    return sequelize.define('Statistics', {
+      statistic_id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
         autoIncrement: true
@@ -13,13 +13,13 @@ module.exports = function(sequelize, DataTypes) {
         type: DataTypes.INTEGER,
         allowNull: false
       },
-      registration_date: {
-        type: DataTypes.DATE,
+      status_id: {
+        type: DataTypes.INTEGER,
         allowNull: false
       }
     }, {
       sequelize,
-      tableName: 'CourseRegistrations',
+      tableName: 'Statistics',
       timestamps: false
     });
   };

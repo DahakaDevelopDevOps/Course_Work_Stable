@@ -10,7 +10,7 @@ module.exports = function(sequelize, DataTypes) {
         allowNull: false
       },
       Role: {
-        type: DataTypes.INTEGER
+        type: DataTypes.INTEGER 
       },
       Password: {
         type: DataTypes.STRING,
