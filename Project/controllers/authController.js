@@ -27,7 +27,7 @@ class AuthController {
             }
 
             if (bcrypt.compareSync(password, user.Password)) {
-                console.log(req.session.userId )
+                console.log('id: '+req.session.userId )
                 req.session.userId = user.ID;
                 if (user.Role === 1) { // Если роль пользователя 1 (админ)
                     res.redirect('/admin');

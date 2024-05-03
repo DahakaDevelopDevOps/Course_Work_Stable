@@ -32,6 +32,7 @@ app.use(expressSession({
     resave: false,
     saveUninitialized: false
 }));
+app.use(bodyParser.urlencoded({ extended: false }));
 app.engine('.hbs', hbs.engine);
 app.set('view engine', '.hbs');
 app.use(express.static(__dirname + '/public'));
