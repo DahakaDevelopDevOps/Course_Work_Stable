@@ -1,5 +1,5 @@
 module.exports = function(sequelize, DataTypes) {
-    return sequelize.define('Statistics', {
+    return sequelize.define('UserStatistics ', {
       statistic_id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
@@ -16,10 +16,18 @@ module.exports = function(sequelize, DataTypes) {
       status_id: {
         type: DataTypes.INTEGER,
         allowNull: false
-      }
+      },
+      start_date: {
+        type: DataTypes.DATE,
+        allowNull: false
+      },
+      end_date: {
+        type: DataTypes.DATE,
+        allowNull: true
+      },
     }, {
       sequelize,
-      tableName: 'Statistics',
+      tableName: 'UserStatistics',
       timestamps: false
     });
   };

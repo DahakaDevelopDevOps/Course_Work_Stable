@@ -5,18 +5,19 @@ class СoursesController {
 
     async getAllCourses(req, res) {
         const courses = await models.Courses.findAll({
-            raw: true
+            raw: true,
+            include: [models.CourseTypes]
         });
-        const types = await models.CourseTypes.findAll({ attributes: ['type_name'], raw: true })
-        res.render("./layouts/courses.hbs", { layout: "courses.hbs", courses: courses, types: types });
-
+        res.render("./layouts/courses.hbs", { layout: "courses.hbs", courses: courses });
     }
+    
 
     async getOneCourse(req, res) {
         const { id } = req.params;
         try {
-            const courses = await models.Courses.findByPk(id);
-            if (!courses) {
+            const courseId = req.params.courseId;
+            const course = await models.Courses.findByPk(courseId, { include: [models.CourseTypes] });
+            if (!course) {
                 return res.status(404).send('Курс не найден');
             }
             res.render('./layouts/courseDetails.hbs', { layout: "courseDetails.hbs", courses: courses });

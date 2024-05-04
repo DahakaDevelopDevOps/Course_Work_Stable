@@ -12,12 +12,8 @@ module.exports = function(sequelize, DataTypes) {
       description: {
         type: DataTypes.STRING(500)
       },
-      start_date: {
-        type: DataTypes.DATE,
-        allowNull: false
-      },
-      end_date: {
-        type: DataTypes.DATE,
+      duration: {
+        type: DataTypes.TIME,
         allowNull: false
       },
       course_type_id: {

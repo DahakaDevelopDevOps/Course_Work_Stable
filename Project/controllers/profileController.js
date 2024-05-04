@@ -14,15 +14,16 @@ class ProfileController {
                     {
                         model: models.Courses,
                         attributes: ['course_name']
-                    },
-                    {
-                        model: models.CourseTypes,
-                        attributes: ['type_name']
                     }
+                    // ,
+                    // {
+                    //     model: models.CourseTypes,
+                    //     attributes: ['type_name']
+                    // }
                 ]
             });
 
-            res.render("./layouts/courses.hbs", { layout: "courses.hbs", courses: courses });
+            res.render("./layouts/profile.hbs", { layout: "profile.hbs", courses: courses });
         } catch (error) {
             console.error('Ошибка при получении профиля:', error);
             res.status(500).send('Произошла ошибка при получении профиля');

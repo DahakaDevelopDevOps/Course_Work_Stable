@@ -1,0 +1,58 @@
+<h1> Здесь должны быьб курсы!!!</h1>
+<h2> Добавь карточки, поиск, фильтры(по типу,)</h2>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Курсы</title>
+    <style>
+        /* Стили для карточек курсов */
+        .course-card {
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin: 10px;
+        }
+    </style>
+</head>
+<body>
+ {{> header}}
+<!-- Карточки курсов -->
+<div id="course-container">
+    {{#each courses}}
+    <div class="course-card">
+        <h2>{{course_name}}</h2>
+        <p>{{description}}</p>
+        <p>Duration: {{duration}}</p>
+        <p>Type: {{CourseType.type_name}}</p>
+        <button class="details-button" data-course-id="{{course_id}}">Подробнее</button>
+
+
+    </div>
+    {{/each}}
+</div>
+
+<script>
+    <script>
+    document.querySelectorAll('.details-button').forEach(button => {
+        button.addEventListener('click', () => {
+            const courseId = button.dataset.courseId;
+            window.location.href = `/courses/${courseId}`;
+        });
+    });
+</script>
+
+    // JavaScript
+    document.querySelectorAll('.details-button').forEach(button => {
+        button.addEventListener('click', async () => {
+            const courseId = button.dataset.courseId;
+            const response = await fetch(`/courses/${courseId}`);
+            const course = await response.json();
+            alert(`Полная информация о курсе:\n${JSON.stringify(course, null, 2)}`);
+        });
+    });
+</script>
+
+</body>
+</html>

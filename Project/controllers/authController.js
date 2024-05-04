@@ -20,7 +20,7 @@ class AuthController {
     async login(req, res) {
         const { username, password } = req.body;
         try {
-            const user = await models.users.findOne({ where: { Login: username } });
+            const user = await models.Users.findOne({ where: { Login: username } });
 
             if (!user) {
                 return res.redirect('/auth/register');
@@ -47,7 +47,7 @@ class AuthController {
     async register(req, res) {
         const { username, email, password } = req.body;
         const hashedPassword = bcrypt.hashSync(password, 10);
-        const candidate = await models.users.findOne({
+        const candidate = await models.Users.findOne({
             where: {
                 Login: username,
             },
@@ -55,7 +55,7 @@ class AuthController {
         if (candidate) {
             res.redirect('/auth/register');
         } else {
-            await models.users.create({
+            await models.Users.create({
                 Login: username,
                 Email: email,
                 Password: hashedPassword,

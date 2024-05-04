@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+{{!-- <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -87,4 +87,46 @@
     }
   </script>
 </body>
+</html> --}}
+ 
+{{!-- !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! --}}
+{{!-- удалить/поставить  комменты ctrl + / --}}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Login Form</title>
+</head>
+<body>
+    <div class="container d-flex align-items-center justify-content-center">
+
+        <form action="/auth/login" method="POST">
+            <label for="username">
+                Username
+                <input class="form-control mb-2" type="text" name="username" required />
+            </label>
+            <br />
+
+            <label for="password">
+                Password
+                <input class="form-control" type="password" name="password" required />
+            </label>
+            <br />
+            <br />
+
+            <button class="btn btn-primary" type="submit">
+                Sign In
+            </button>
+            <button class="btn btn-secondary ms-3" type="button" onclick="location.href = '/auth/register'">
+                Create account
+            </button>
+        </form>
+
+    </div>
+</body>
 </html>
+
+
+
+
+
