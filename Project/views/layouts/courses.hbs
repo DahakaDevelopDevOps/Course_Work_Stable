@@ -1,4 +1,4 @@
-<h1> Здесь должны быьб курсы!!!</h1>
+<h1> Здесь должны быть курсы!!!</h1>
 <h2> Добавь карточки, поиск, фильтры(по типу,)</h2>
 
 <!DOCTYPE html>
@@ -19,31 +19,55 @@
 <body>
  {{> header}}
 <!-- Карточки курсов -->
+<select id="course-type-select">
+    <option value="">Все типы</option>
+    {{#each courseTypes}}
+    <option value="{{this.type_name}}">{{this.type_name}}</option>
+    {{/each}}
+</select>
+
 <div id="course-container">
     {{#each courses}}
     <div class="course-card">
         <h2>{{course_name}}</h2>
         <p>{{description}}</p>
         <p>Duration: {{duration}}</p>
-        <p>Type: {{CourseType.type_name}}</p>
+        {{!-- добавь что-то еще --}}
         <button class="details-button" data-course-id="{{course_id}}">Подробнее</button>
-
 
     </div>
     {{/each}}
 </div>
 
 <script>
-    <script>
     document.querySelectorAll('.details-button').forEach(button => {
         button.addEventListener('click', () => {
             const courseId = button.dataset.courseId;
             window.location.href = `/courses/${courseId}`;
         });
     });
-</script>
-
-    // JavaScript
+   //!!!!!!!!!!!!!!!!!! НЕ РАБОТАЕТ!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    // Обработчик события изменения значения выпадающего списка
+    document.getElementById('course-type-select').addEventListener('change', async (event) => {
+        const selectedType = event.target.value;
+        const response = await fetch(`/courses?type=${selectedType}`);
+        const courses = await response.json();
+        const courseContainer = document.getElementById('course-container');
+        courseContainer.innerHTML = ''; // Очистить контейнер
+        courses.forEach(course => {
+            const courseCard = document.createElement('div');
+            courseCard.classList.add('course-card');
+            courseCard.innerHTML = `
+                <h2>${course.course_name}</h2>
+                <p>${course.description}</p>
+                <p>Duration: ${course.duration}</p>
+                <p>Type: ${course.CourseType.type_name}</p>
+                <button class="details-button" data-course-id="${course.course_id}">Подробнее</button>
+            `;
+            courseContainer.appendChild(courseCard);
+        });
+    });
+     // JavaScript
     document.querySelectorAll('.details-button').forEach(button => {
         button.addEventListener('click', async () => {
             const courseId = button.dataset.courseId;

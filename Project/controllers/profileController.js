@@ -37,22 +37,23 @@ class ProfileController {
 
     async getFinishedCourses(req, res) {
         try {
-            const statusPassed = await models.Status.findOne({ where: { status_name: 'Finised' } });
+            const statusPassed = await models.Status.findOne({ where: { status_name: 'finished' } });
             if (statusPassed) {
                 const courses = await models.Statistics.findAll({ 
                     where: { 
                         user_id: req.session.userId,
-                        status_id: statusPassed.id // Используем id статуса "пройден" для фильтрации курсов
+                        status_id: 1 // Используем id статуса "пройден" для фильтрации курсов
                     },
                     include: [
                         {
                             model: models.Courses,
                             attributes: ['course_name']
-                        },
-                        {
-                            model: models.CourseTypes,
-                            attributes: ['type_name']
                         }
+                        // ,
+                        // {
+                        //     model: models.CourseTypes,
+                        //     attributes: ['type_name']
+                        // }
                     ]
                 });
     
@@ -99,22 +100,23 @@ class ProfileController {
 
     async getInprocessCourses(req, res) {
         try {
-            const statusPassed = await models.Status.findOne({ where: { status_name: 'Inproc' } });
+            const statusPassed = await models.Status.findOne({ where: { status_name: 'inproc' } });
             if (statusPassed) {
                 const courses = await models.Statistics.findAll({ 
                     where: { 
                         user_id: req.session.userId,
-                        status_id: statusPassed.id // Используем id статуса "пройден" для фильтрации курсов
+                        status_id: 2// Используем id статуса "пройден" для фильтрации курсов
                     },
                     include: [
                         {
                             model: models.Courses,
                             attributes: ['course_name']
-                        },
-                        {
-                            model: models.CourseTypes,
-                            attributes: ['type_name']
                         }
+                        // ,
+                        // {
+                        //     model: models.CourseTypes,
+                        //     attributes: ['type_name']
+                        // }
                     ]
                 });
     
@@ -124,7 +126,7 @@ class ProfileController {
                 res.render("./layouts/courses.hbs", { layout: "courses.hbs", courses: [] });
             }
         } catch (error) {
-            console.error('Ошибка при получении завершенных курсов:', error);
+            console.error('Ошибка при получении  курсов в процессе:', error);
             res.status(500).send('Произошла ошибка при получении завершенных курсов');
         }
     }
