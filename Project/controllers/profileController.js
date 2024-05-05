@@ -15,12 +15,8 @@ class ProfileController {
                         model: models.Courses,
                         attributes: ['course_name']
                     }
-                    // ,
-                    // {
-                    //     model: models.CourseTypes,
-                    //     attributes: ['type_name']
-                    // }
-                ]
+                ],
+                raw: true
             });
 
             res.render("./layouts/profile.hbs", { layout: "profile.hbs", courses: courses });
@@ -49,12 +45,8 @@ class ProfileController {
                             model: models.Courses,
                             attributes: ['course_name']
                         }
-                        // ,
-                        // {
-                        //     model: models.CourseTypes,
-                        //     attributes: ['type_name']
-                        // }
-                    ]
+                    ],
+                    raw: true
                 });
     
                 res.render("./layouts/finishedcourses.hbs", { layout: "finishedcourses.hbs", courses: courses });
@@ -112,14 +104,11 @@ class ProfileController {
                             model: models.Courses,
                             attributes: ['course_name']
                         }
-                        // ,
-                        // {
-                        //     model: models.CourseTypes,
-                        //     attributes: ['type_name']
-                        // }
-                    ]
+                    ],
+                    raw: true
                 });
     
+                console.log('курсы'+ courses)
                 res.render("./layouts/inproccourses.hbs", { layout: "inproccourses.hbs", courses: courses });
             } else {
                 // Если статус "пройден" не найден, вернуть пустой результат или придумай что)))
@@ -130,6 +119,7 @@ class ProfileController {
             res.status(500).send('Произошла ошибка при получении завершенных курсов');
         }
     }
+
     async  updateCourseStatus(req, res) {
         const { courseId } = req.params;
         const { newStatus } = req.body;
