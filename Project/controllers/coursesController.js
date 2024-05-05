@@ -40,8 +40,6 @@ class СoursesController {
             }
             // Получаем название типа курса
         const type = await models.CourseTypes.findOne({ where: { type_id: course.course_type_id }, raw: true });
-        console.log('course !!!!' + course)
-        console.log('Type !!!!' + type)
             res.render('./layouts/courseDetails.hbs', { layout: "courseDetails.hbs", course: course, type: type });
         } catch (error) {
             console.error('Ошибка при получении курса:', error);

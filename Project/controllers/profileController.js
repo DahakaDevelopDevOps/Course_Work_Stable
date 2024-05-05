@@ -8,7 +8,7 @@ class ProfileController {
             return res.render("./layouts/registration.hbs", { layout: "registration.hbs" });
         }
         try {
-            const courses = await models.Statistics.findAll({raw: true,
+            const courses = await models.Statistics.findAll({
                 where: { user_id: req.session.userId },
                 include: [
                     {
@@ -33,27 +33,30 @@ class ProfileController {
 
     async getFinishedCourses(req, res) {
         try {
-            const statusPassed = await models.Status.findOne({ where: { status_name: 'finished' } });
-            if (statusPassed) {
-                const courses = await models.Statistics.findAll({ 
-                    where: { 
-                        user_id: req.session.userId,
-                        status_id: 1 // Используем id статуса "пройден" для фильтрации курсов
-                    },
-                    include: [
-                        {
-                            model: models.Courses,
-                            attributes: ['course_name']
-                        }
-                    ],
-                    raw: true
-                });
+            const coursesWithDetails = await models.Statistics.findAll({ 
+                where: { 
+                    user_id: req.session.userId,
+                    status_id: 1
+                },
+                include: [
+                    {
+                        model: models.Courses
+                    }
+                ],
+                raw: true
+            });
+    
+            const courses = coursesWithDetails.map(courseDetail => ({
+                course_id: courseDetail.course_id,
+                course_name: courseDetail['Course.course_name'],
+                description: courseDetail['Course.description'],
+                duration: courseDetail['Course.duration'],
+                statistic_id: courseDetail.statistic_id,
+                start_date: courseDetail.start_date,
+                end_date: courseDetail.end_date
+            }));
     
                 res.render("./layouts/finishedcourses.hbs", { layout: "finishedcourses.hbs", courses: courses });
-            } else {
-                // Если статус "пройден" не найден, вернуть пустой результат или придумай что)))
-                res.render("./layouts/courses.hbs", { layout: "courses.hbs", courses: [] });
-            }
         } catch (error) {
             console.error('Ошибка при получении завершенных курсов:', error);
             res.status(500).send('Произошла ошибка при получении завершенных курсов');
@@ -63,33 +66,39 @@ class ProfileController {
 
     async getInprocessCourses(req, res) {
         try {
-            const statusPassed = await models.Status.findOne({ where: { status_name: 'inproc' } });
-            if (statusPassed) {
-                const courses = await models.Statistics.findAll({ 
-                    where: { 
-                        user_id: req.session.userId,
-                        status_id: 2// Используем id статуса "пройден" для фильтрации курсов
-                    },
-                    include: [
-                        {
-                            model: models.Courses,
-                            attributes: ['course_name']
-                        }
-                    ],
-                    raw: true
-                });
+            const coursesWithDetails = await models.Statistics.findAll({ 
+                where: { 
+                    user_id: req.session.userId,
+                    status_id: 2
+                },
+                include: [
+                    {
+                        model: models.Courses
+                    }
+                ],
+                raw: true
+            });
     
-                console.log('курсы'+ courses)
-                res.render("./layouts/inproccourses.hbs", { layout: "inproccourses.hbs", courses: courses });
-            } else {
-                // Если статус "пройден" не найден, вернуть пустой результат или придумай что)))
-                res.render("./layouts/courses.hbs", { layout: "courses.hbs", courses: [] });
-            }
+            const courses = coursesWithDetails.map(courseDetail => ({
+                course_id: courseDetail.course_id,
+                course_name: courseDetail['Course.course_name'],
+                description: courseDetail['Course.description'],
+                duration: courseDetail['Course.duration'],
+                statistic_id: courseDetail.statistic_id,
+                start_date: courseDetail.start_date,
+                end_date: courseDetail.end_date
+            }));
+    
+            console.log(courses);
+    
+            res.render("./layouts/inproccourses.hbs", { layout: "inproccourses.hbs", courses: courses });
+    
         } catch (error) {
-            console.error('Ошибка при получении  курсов в процессе:', error);
+            console.error('Ошибка при получении курсов в процессе:', error);
             res.status(500).send('Произошла ошибка при получении завершенных курсов');
         }
     }
+    
 
     async  updateCourseStatus(req, res) {
         const { courseId } = req.params;
