@@ -59,35 +59,6 @@ class ProfileController {
             res.status(500).send('Произошла ошибка при получении завершенных курсов');
         }
     }
-
-    //если не работает, то можно использовать это
-    // async getFinishedCourses(req, res) {
-    //     try {
-    //         const courses = await models.Statistics.findAll({ 
-    //             raw: true,
-    //             where: { 
-    //                 user_id: req.session.userId,
-    //                 status_id: 1 // Предположим, что статус "пройден" имеет status_id, равный 1
-    //             },
-    //             include: [
-    //                 {
-    //                     model: models.Courses,
-    //                     attributes: ['course_name']
-    //                 },
-    //                 {
-    //                     model: models.CourseTypes,
-    //                     attributes: ['type_name']
-    //                 }
-    //             ]
-    //         });
-            
-    //         res.render("./layouts/courses.hbs", { layout: "courses.hbs", courses: courses});
-    //     } catch (error) {
-    //         console.error('Ошибка при получении завершенных курсов:', error);
-    //         res.status(500).send('Произошла ошибка при получении завершенных курсов');
-    //     }
-    // }
-    
     
 
     async getInprocessCourses(req, res) {
