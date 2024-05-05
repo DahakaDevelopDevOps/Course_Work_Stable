@@ -7,22 +7,27 @@ class СoursesController {
         try {
             let courses;
             const { type } = req.query;
+            console.log("ТИппппп " + type)
             if (type) {
                 courses = await models.Courses.findAll({
-                    include: [{ model: models.CourseTypes, where: { type_name: type }, raw: true }]
-                },);
+                    include: [{ model: models.CourseTypes, where: { type_id: type } }],
+                    raw: true
+                });
             } else {
                 courses = await models.Courses.findAll({
-                    include: [models.CourseTypes], raw: true
+                    include: [models.CourseTypes],
+                    raw: true
                 });
             }
-            const courseTypes = await models.CourseTypes.findAll({ raw: true }); // Изменение имени переменной
-            res.render("./layouts/courses.hbs", { layout: "courses.hbs", courses: courses, courseTypes: courseTypes }); // Изменение имени переменной в объекте передаваемых данных
+            const courseTypes = await models.CourseTypes.findAll({ raw: true });
+            const typeIn = await models.CourseTypes.findByPk(type, { raw: true });
+            res.render("./layouts/courses.hbs", { layout: "courses.hbs", courses: courses, courseTypes: courseTypes, typeIn: typeIn });
         } catch (error) {
             console.error('Ошибка при получении курсов:', error);
             res.status(500).send('Произошла ошибка при получении курсов');
         }
     }
+    
     
 
     async getOneCourse(req, res) {

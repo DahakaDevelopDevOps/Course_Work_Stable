@@ -1,8 +1,6 @@
-<h1> Здесь должны быть курсы!!!</h1>
-<h2> Добавь карточки, поиск, фильтры(по типу,)</h2>
-
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -16,67 +14,52 @@
         }
     </style>
 </head>
+
 <body>
- {{> header}}
-<!-- Карточки курсов -->
-<select id="course-type-select">
-    <option value="">Все типы</option>
-    {{#each courseTypes}}
-    <option value="{{this.type_name}}">{{this.type_name}}</option>
-    {{/each}}
-</select>
+    {{> header}}
+    <!-- Карточки курсов -->
+    <select id="course-type-select">
+        <option value="{{typeIn.type_id}}">{{typeIn.type_name}}</option>
+        <option value="0">Все типы</option>
+        
+        {{#each courseTypes}}
+        <option value="{{this.type_id}}">{{this.type_name}}</option>
+        {{/each}}
+    </select>
 
-<div id="course-container">
-    {{#each courses}}
-    <div class="course-card">
-        <h2>{{course_name}}</h2>
-        <p>{{description}}</p>
-        <p>Duration: {{duration}}</p>
-        {{!-- добавь что-то еще --}}
-        <button class="details-button" data-course-id="{{course_id}}">Подробнее</button>
-
+    <div id="course-container">
+        {{#each courses}}
+        <div class="course-card">
+            <h2>{{course_name}}</h2>
+            <p>{{description}}</p>
+            <p>Duration: {{duration}}</p>
+            {{!-- добавь что-то еще --}}
+            <button class="details-button" data-course-id="{{course_id}}">Подробнее</button>
+        </div>
+        {{/each}}
     </div>
-    {{/each}}
-</div>
 
-<script>
-    document.querySelectorAll('.details-button').forEach(button => {
-        button.addEventListener('click', () => {
-            const courseId = button.dataset.courseId;
-            window.location.href = `/courses/${courseId}`;
+    <script>
+        document.querySelectorAll('.details-button').forEach(button => {
+            button.addEventListener('click', () => {
+                const courseId = button.dataset.courseId;
+                window.location.href = `/courses/${courseId}`;
+            });
         });
-    });
-   //!!!!!!!!!!!!!!!!!! НЕ РАБОТАЕТ!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    // Обработчик события изменения значения выпадающего списка
-    document.getElementById('course-type-select').addEventListener('change', async (event) => {
-        const selectedType = event.target.value;
-        const response = await fetch(`/courses?type=${selectedType}`);
-        const courses = await response.json();
-        const courseContainer = document.getElementById('course-container');
-        courseContainer.innerHTML = ''; // Очистить контейнер
-        courses.forEach(course => {
-            const courseCard = document.createElement('div');
-            courseCard.classList.add('course-card');
-            courseCard.innerHTML = `
-                <h2>${course.course_name}</h2>
-                <p>${course.description}</p>
-                <p>Duration: ${course.duration}</p>
-                <p>Type: ${course.CourseType.type_name}</p>
-                <button class="details-button" data-course-id="${course.course_id}">Подробнее</button>
-            `;
-            courseContainer.appendChild(courseCard);
+
+        document.getElementById('course-type-select').addEventListener('change', async (event) => {
+            const selectedType = event.target.value;
+            if (selectedType && selectedType!= 0 ) {
+                const currentUrl = new URL(window.location.href);
+                currentUrl.searchParams.set('type', selectedType);
+                window.location.href = currentUrl.toString();
+            } else {
+                // Если выбран пункт "Все типы", перезагрузить страницу без параметра type
+                window.location.href = '/courses';
+            }
         });
-    });
-     // JavaScript
-    document.querySelectorAll('.details-button').forEach(button => {
-        button.addEventListener('click', async () => {
-            const courseId = button.dataset.courseId;
-            const response = await fetch(`/courses/${courseId}`);
-            const course = await response.json();
-            alert(`Полная информация о курсе:\n${JSON.stringify(course, null, 2)}`);
-        });
-    });
-</script>
+    </script>
 
 </body>
+
 </html>

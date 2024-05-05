@@ -5,11 +5,15 @@ class EntryController {
 
     async getEntry(req, res) {
         try {
+            const user = req.session.id;
+            console.log(user)
             const id = req.query.courseId; // Используем courseId, а не id
             if(id){
-            const course = await models.Courses.findByPk(id, { include: [models.CourseTypes], raw: true });
-            console.log(id);
-            res.render("./layouts/entry.hbs", { layout: "entry.hbs", course:course });}
+            const course = await models.Courses.findByPk(id, { include: [models.CourseTypes], raw: true});
+            //console.log(course);
+            const courses = await models.Courses.findAll({ include: [models.CourseTypes], raw: true  });
+            res.render("./layouts/entry.hbs", { layout: "entry.hbs", course:course, courses: courses});
+        }
            
         } catch (error) {
             console.error('Ошибка при получении курсов:', error);
