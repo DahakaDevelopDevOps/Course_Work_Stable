@@ -1,7 +1,5 @@
-const models = require('../db/models/initModels');
-// const jwt = require('jsonwebtoken');
-// const refreshKey = 'cats';
-// const accessKey = 'cats';
+const { models } = require('../db/utils/db');
+const bcrypt = require('bcrypt');
 
 
 class AuthController {
@@ -13,148 +11,57 @@ class AuthController {
         res.render("./layouts/registration.hbs", { layout: "registration.hbs" });
     }
 
-    // refreshToken(req, res) {
-    //     if (req.cookies.refreshToken) {
-    //         jwt.verify(
-    //             req.cookies.refreshToken,
-    //             refreshKey,
-    //             async (err, payload) => {
-    //                 if (err) {
-    //                     console.log(err.message);
-    //                 } else if (payload) {
-    //                     client.on('ready', () => console.log('ready'));
-    //                     client.on('error', (err) => console.log(`error: ${err}`));
-    //                     client.on('connect', () => console.log('connect'));
-    //                     client.on('end', () => console.log('end'));
-    //                     client.set(oldrefreshKeyCount, req.cookies.refreshToken, () =>
-    //                         console.log('set old refresh token')
-    //                     );
-    //                     client.get(oldrefreshKeyCount, (err, result) =>
-    //                         console.log('added old refresh token:', result)
-    //                     );
-    //                     oldrefreshKeyCount++;
-    //                     client.quit();
-    //                     const candidate = await UsersCASL.findOne({
-    //                         where: {
-    //                             id: payload.id,
-    //                         },
-    //                     });
-    //                     const newAccessToken = jwt.sign(
-    //                         {
-    //                             id: candidate.id,
-    //                             username: candidate.username,
-    //                             role: candidate.role,
-    //                         },
-    //                         accessKey,
-    //                         { expiresIn: 200 * 60 }
-    //                     );
-    //                     const newRefreshToken = jwt.sign(
-    //                         {
-    //                             id: candidate.id,
-    //                             username: candidate.username,
-    //                             role: candidate.role,
-    //                         },
-    //                         refreshKey,
-    //                         { expiresIn: 24 * 60 * 60 }
-    //                     );
-    //                     res.cookie('accessToken', newAccessToken, {
-    //                         httpOnly: true,
-    //                         sameSite: 'strict',
-    //                     });
-    //                     res.cookie('refreshToken', newRefreshToken, {
-    //                         path: '/refresh-token',
-    //                     });
-    //                     res.redirect('/resource');
-    //                 }
-    //             }
-    //         );
-    //     } else {
-    //         res.status(401).send('[ERROR] 401: Unauthorized');
-    //     }
-    // }
-
-
     logout(req, res) {
-        //res.clearCookie('accessToken');
-       // res.clearCookie('refreshToken');
-        //редирект на страницу, с которой перешел???
-        //res.redirect('/');
+        req.session.destroy();
+        res.redirect('/');
     }
 
 
     async login(req, res) {
-        // const candidate = await Users.findOne({
-        //     where: {
-        //         username: req.body.username,
-        //         password: req.body.password,
-        //     },
-        // });
-        // if (candidate) {
-        //     const accessToken = jwt.sign(
-        //         {
-        //             id: candidate.id,
-        //             username: candidate.username,
-        //             role: candidate.role,
-        //         },
-        //         accessKey,
-        //         { expiresIn: 10 * 60 }
-        //     );
-
-        //     const refreshToken = jwt.sign(
-        //         {
-        //             id: candidate.id,
-        //             username: candidate.username,
-        //             role: candidate.role,
-        //         },
-        //         refreshKey,
-        //         { expiresIn: 24 * 60 * 60 }
-        //     );
-        //     res.cookie('accessToken', accessToken, {
-        //         httpOnly: true,
-        //         sameSite: 'strict',
-        //     });
-        //     res.cookie('refreshToken', refreshToken, {
-        //         httpOnly: true,
-        //         sameSite: 'strict',
-        //     });
-         //    }
-        // else {
-        //     res.redirect('/login');
-        // }
         const { username, password } = req.body;
-    
         try {
-          const user = await Users.findOne({ where: { Login: username, Password: password } });
-    
-          if (!user) {
-            return res.redirect('/register');
-          }
-          const redirectUrl = req.session.originalUrl || '/'; 
+            const user = await models.Users.findOne({ where: { Login: username } });
 
-          res.redirect(redirectUrl);
+            if (!user) {
+                return res.redirect('/auth/register');
+            }
+
+            if (bcrypt.compareSync(password, user.Password)) {
+                console.log('id: '+req.session.userId )
+                req.session.userId = user.ID;
+                if (user.Role === 1) { // Если роль пользователя 1 (админ)
+                    res.redirect('/admin');
+                } else {
+                    res.redirect('/');
+                }
+            } else {
+                res.status(401).send('Неверное имя пользователя или пароль');
+            }
         } catch (error) {
-          console.error('Ошибка при аутентификации пользователя:', error);
-          res.status(500).send('Произошла ошибка при попытке входа');
+            console.error('Ошибка при аутентификации пользователя:', error);
+            res.status(500).send('Произошла ошибка при попытке входа');
         }
-      }
+    }
 
 
     async register(req, res) {
-        const candidate = await Users.findOne({
+        const { username, email, password } = req.body;
+        const hashedPassword = bcrypt.hashSync(password, 10);
+        const candidate = await models.Users.findOne({
             where: {
-                username: req.body.username,
+                Login: username,
             },
         });
         if (candidate) {
-            res.redirect('/register');
+            res.redirect('/auth/register');
         } else {
-            await Users.create({
-                username: req.body.username,
-                email: req.body.email,
-                password: req.body.password,
-                role: 0,
+            await models.Users.create({
+                Login: username,
+                Email: email,
+                Password: hashedPassword,
+                Role: 0,
             });
-            res.redirect('/login');
+            res.redirect('/auth/login');
         }
     }
 }

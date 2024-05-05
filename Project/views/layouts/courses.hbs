@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Курсы</title>
+    <style>
+        /* Стили для карточек курсов */
+        .course-card {
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    {{> header}}
+    <!-- Карточки курсов -->
+    <select id="course-type-select">
+        <option value="{{typeIn.type_id}}">{{typeIn.type_name}}</option>
+        <option value="0">Все типы</option>
+        
+        {{#each courseTypes}}
+        <option value="{{this.type_id}}">{{this.type_name}}</option>
+        {{/each}}
+    </select>
+
+    <div id="course-container">
+        {{#each courses}}
+        <div class="course-card">
+            <h2>{{course_name}}</h2>
+            <p>{{description}}</p>
+            <p>Duration: {{duration}}</p>
+            {{!-- добавь что-то еще --}}
+            <button class="details-button" data-course-id="{{course_id}}">Подробнее</button>
+        </div>
+        {{/each}}
+    </div>
+
+    <script>
+        document.querySelectorAll('.details-button').forEach(button => {
+            button.addEventListener('click', () => {
+                const courseId = button.dataset.courseId;
+                window.location.href = `/courses/${courseId}`;
+            });
+        });
+
+        document.getElementById('course-type-select').addEventListener('change', async (event) => {
+            const selectedType = event.target.value;
+            if (selectedType && selectedType!= 0 ) {
+                const currentUrl = new URL(window.location.href);
+                currentUrl.searchParams.set('type', selectedType);
+                window.location.href = currentUrl.toString();
+            } else {
+                // Если выбран пункт "Все типы", перезагрузить страницу без параметра type
+                window.location.href = '/courses';
+            }
+        });
+    </script>
+
+</body>
+
+</html>

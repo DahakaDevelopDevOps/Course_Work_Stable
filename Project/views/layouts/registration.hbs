@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+{{!-- <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -67,19 +67,19 @@
 </head>
 <body>
   <div class="container mt-5">
-    <form id="registration-form">
+    <form id="registration-form" form action="/auth/register" method="POST">
       <div class="mb-4"> <!-- increased margin -->
         <label for="username" class="form-label">Username</label>
-        <input type="text" class="form-control" id="username" pattern="[a-zA-Z0-9]{4,}" title="Username must contain only letters and numbers, and be at least 4 characters long" required>
+        <input type="text" class="form-control" name="username"  id="username" pattern="[a-zA-Z0-9]{4,}" title="Username must contain only letters and numbers, and be at least 4 characters long" required>
       </div>
       <div class="mb-4"> <!-- increased margin -->
         <label for="email" class="form-label">Email address</label>
-        <input type="email" class="form-control" id="email" aria-describedby="emailHelp" required>
+        <input type="email" class="form-control" id="email" name="email" aria-describedby="emailHelp" required>
         <div id="emailHelp" class="form-text">We'll never share your email with anyone else.</div>
       </div>
       <div class="mb-4"> <!-- increased margin -->
         <label for="password" class="form-label">Password</label>
-        <input type="password" class="form-control" id="password" pattern=".{8,}" title="Password must be at least 8 characters long" required>
+        <input type="password" class="form-control" id="password" pattern=".{8,}" name="password" title="Password must be at least 8 characters long" required>
       </div>
       <div class="mb-4"> <!-- increased margin -->
         <label for="confirm-password" class="form-label">Confirm Password</label>
@@ -96,4 +96,46 @@
     }
   </script>
 </body>
+</html> --}}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Регистрация</title>
+</head>
+
+<body>
+    <div>
+
+        <form action="/auth/register" method="POST">
+            <label>
+                Username
+                <input class="form-control mb-2" type="text" name="username" required />
+            </label>
+            <br />
+
+            <label>
+                Email
+                <input class="form-control mb-2" type="text" name="email" required />
+            </label>
+            <br />
+
+            <label>
+                Password
+                <input class="form-control mb-2" type="password" name="password" required />
+            </label>
+            <br />
+
+            <button class="btn btn-primary" type="submit">
+                Sign Up
+            </button>
+            <button class="btn btn-secondary ms-3" type="button" onclick="location.href = '/auth/login'">
+                Already have an account?
+            </button>
+        </form>
+    </div>
+</body>
+
 </html>

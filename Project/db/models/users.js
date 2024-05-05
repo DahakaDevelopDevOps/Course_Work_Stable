@@ -10,7 +10,7 @@ module.exports = function(sequelize, DataTypes) {
         allowNull: false
       },
       Role: {
-        type: DataTypes.INTEGER
+        type: DataTypes.INTEGER 
       },
       Password: {
         type: DataTypes.STRING,
@@ -19,6 +19,10 @@ module.exports = function(sequelize, DataTypes) {
       Email: {
         type: DataTypes.STRING(50),
         allowNull: false
+      },
+      SessionId: {
+        type: DataTypes.INTEGER, // Предполагается, что идентификатор сессии - строка
+        allowNull: true // Может быть пустым, если пользователь не авторизован
       }
     }, {
       sequelize,

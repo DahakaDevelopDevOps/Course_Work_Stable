@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Course Details</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f0f0;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .course {
+            text-align: center;
+        }
+
+        .course p {
+            margin: 10px 0;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Course Details</h1>
+        <div class="course">
+            <p>Описание: {{course.description}}</p>
+            <p>Продолжительность: {{course.duration}}</p>
+            <p>Тип курса: {{type.type_name}}</p> <!-- Выводим название типа курса -->
+            <button class="details-button" data-course-id="{{course_id}}">Записаться!</button>
+        </div>
+        <a href="/courses">Назад</a>
+    </div>
+
+    <script>
+        document.querySelector('.details-button').addEventListener('click', () => {
+            const currentUrl = window.location.href;
+            const courseId = currentUrl.substring(currentUrl.lastIndexOf('/') + 1);
+            const newUrl = `/entry?courseId=${courseId}`;
+            window.location.href = newUrl;
+        });
+
+    </script>
+</body>
+
+</html>

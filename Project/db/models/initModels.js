@@ -1,7 +1,7 @@
 const users = require("./users");
 const courses = require("./courses");
-const courseRegistrations = require("./courseRegistrations");
-const completedCourses = require("./completedCourses");
+const status = require("./status");
+const statistics = require("./statistics");
 const courseTypes = require("./types");
 
 const { DataTypes } = require('sequelize');
@@ -9,26 +9,17 @@ const { DataTypes } = require('sequelize');
 function initModels(sequelize) {
   const Users = users(sequelize, DataTypes);
   const Courses = courses(sequelize, DataTypes);
-  const CourseRegistrations = courseRegistrations(sequelize, DataTypes);
-  const CompletedCourses = completedCourses(sequelize, DataTypes);
+  const Status = status(sequelize, DataTypes);
+  const Statistics = statistics(sequelize, DataTypes);
   const CourseTypes = courseTypes(sequelize, DataTypes);
 
-  // Определение связей между таблицами
-  // Например, если у курса есть преподаватель, то добавляем связь между таблицами Courses и Users
-  Courses.belongsTo(Users, { foreignKey: 'instructor_id' });
-  Users.hasMany(Courses, { foreignKey: 'instructor_id' });
 
-  // Связи для таблицы CourseRegistrations
-  CourseRegistrations.belongsTo(Users, { foreignKey: 'user_id' });
-  Users.hasMany(CourseRegistrations, { foreignKey: 'user_id' });
-  CourseRegistrations.belongsTo(Courses, { foreignKey: 'course_id' });
-  Courses.hasMany(CourseRegistrations, { foreignKey: 'course_id' });
-
-  // Связи для таблицы CompletedCourses
-  CompletedCourses.belongsTo(Users, { foreignKey: 'user_id' });
-  Users.hasMany(CompletedCourses, { foreignKey: 'user_id' });
-  CompletedCourses.belongsTo(Courses, { foreignKey: 'course_id' });
-  Courses.hasMany(CompletedCourses, { foreignKey: 'course_id' });
+  Statistics.belongsTo(Users, { foreignKey: 'user_id' });
+  Users.hasMany(Statistics, { foreignKey: 'user_id' });
+  Statistics.belongsTo(Courses, { foreignKey: 'course_id' });
+  Courses.hasMany(Statistics, { foreignKey: 'course_id' });
+  Statistics.belongsTo(Status, { foreignKey: 'status_id' });
+  Status.hasMany(Statistics, { foreignKey: 'status_id' });
 
   // Связи для таблицы Courses и CourseTypes
   Courses.belongsTo(CourseTypes, { foreignKey: 'course_type_id' });
@@ -37,8 +28,8 @@ function initModels(sequelize) {
   return {
     Users,
     Courses,
-    CourseRegistrations,
-    CompletedCourses,
+    Status,
+    Statistics,
     CourseTypes
   };
 }
