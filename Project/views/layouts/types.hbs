@@ -7,18 +7,20 @@
     <title>Курсы</title>
     <style>
         /* Стили для карточек курсов */
-        .course-card {
+        .types-card {
             border: 1px solid #ccc;
-            padding: 10px;
+            border-radius: 8px; /* Добавлен скругленный угол для карточек */
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Добавлен тень для эффекта поднятия */
+            padding: 20px;
             margin: 10px;
+            background-color: #f9f9f9; /* Добавлен фоновый цвет для карточек */
         }
     </style>
 </head>
 
 <body>
-    {{> header}}
-        {{> adminHeader}}
-        {{> back}}
+    {{> adminHeader}}
+    {{> back}}
 
     <div id="course-container">
         {{#each types}}

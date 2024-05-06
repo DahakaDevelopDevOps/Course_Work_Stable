@@ -7,10 +7,42 @@
     <!-- можно вынести в отдельный partial весь <head></head> и параметром передавать css файлы -->
 </head>
 <body>
-    {{> header}}
 
     <h1>Добро пожаловать на главную страницу!</h1>
-
+<nav style="background-color: #007bff; padding: 10px;">
+    <ul style="list-style: none; margin: 0; padding: 0; display: flex; justify-content: space-between;">
+        <li style="margin-right: 20px;"><a href="/courses" style="color: #ffffff; text-decoration: none; font-size: 20px; font-weight: bold;">Курсы</a></li>
+        <li style="margin-right: 20px;"><a href="/profile" style="color: #ffffff; text-decoration: none; font-size: 20px; font-weight: bold;">Ваш профиль</a></li>
+        <li id="login-logout" style="margin-right: 20px;"><a id="login-logout-link" href="/auth/login" style="color: #ffffff; text-decoration: none; font-size: 20px; font-weight: bold;">Вход</a></li>
+    </ul>
+</nav>
     {{!-- {{> footer}} --}}
 </body>
 </html>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+    const loginLogoutLink = document.getElementById('login-logout-link');
+    const xhr = new XMLHttpRequest();
+    xhr.onreadystatechange = function() {
+        if (xhr.readyState === XMLHttpRequest.DONE) {
+            if (xhr.status === 200) {
+                const isAuthenticated = JSON.parse(xhr.responseText).isAuthenticated;
+
+                // Изменяем текст и ссылку в зависимости от статуса аутентификации
+                if (isAuthenticated) {
+                    loginLogoutLink.textContent = 'Выход';
+                    loginLogoutLink.href = '/auth/logout';
+                } else {
+                    loginLogoutLink.textContent = 'Вход';
+                    loginLogoutLink.href = '/auth/login';
+                }
+            } else {
+                console.error('Произошла ошибка при выполнении AJAX-запроса');
+            }
+        }
+    };
+    xhr.open('GET', '/auth/status', true); // Путь '/auth/status' предполагает наличие на сервере соответствующего маршрута для проверки статуса аутентификации
+    xhr.send();
+});
+
+</script>

@@ -176,13 +176,18 @@ class AdminController {
     }
 
     async deleteCourse(req, res) {
-        const { courseId } = req.params;
+        const  courseId  = req.params.id;
         try {
+
+            console.log('Удаление')
+            console.log(courseId)
             const classInstance = await models.Courses.findByPk(courseId);
             if (!classInstance) {
+                console.log('не Завершено')
                 return res.status(404).send('Класс не найден');
             }
             await classInstance.destroy();
+            console.log('Завершено')
             res.send('Класс успешно удален');
         } catch (error) {
             console.error('Ошибка при удалении класса:', error);

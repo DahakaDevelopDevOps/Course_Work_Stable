@@ -20,7 +20,7 @@
             <option value="{{this.course_id}}">{{this.course_name}}</option>
             {{/each}}
         </select>
-        <p>Продолжительность: {{course.duration}}</p>
+        <p>Продолжительность в часах: {{course.duration}}</p>
         <p>Описание: {{course.description}}</p>
         <label for="email">Электронная почта:</label>
         <input type="email" id="email" name="email" value="{{user.Email}}" required><br><br>
@@ -36,6 +36,7 @@
             const courseId = this.value;
             window.location.href = `/entry?courseId=${courseId}`;
         });
+        
 
     </script>
 </body>

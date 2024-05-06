@@ -13,7 +13,7 @@ module.exports = function(sequelize, DataTypes) {
         type: DataTypes.STRING(500)
       },
       duration: {
-        type: DataTypes.TIME,
+        type: DataTypes.FLOAT,
         allowNull: false
       },
       course_type_id: {

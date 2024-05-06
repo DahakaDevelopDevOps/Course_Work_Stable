@@ -6,23 +6,34 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Курсы</title>
     <style>
-        /* Стили для карточек курсов */
-        .course-card {
-            border: 1px solid #ccc;
-            padding: 10px;
-            margin: 10px;
+        /* Стили для карточек пользователей */
+        .user-card {
+            background-color: #f9f9f9; /* Цвет фона */
+            border: 1px solid #ddd; /* Граница */
+            border-radius: 8px; /* Скругленные углы */
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Тень */
+            padding: 20px; /* Отступ внутри карточки */
+            margin: 10px; /* Внешний отступ */
+            max-width: 400px; /* Максимальная ширина */
+            overflow: hidden; /* Предотвращение переполнения содержимого */
+        }
+        .user-card h2 {
+            margin-top: 0; /* Убираем верхний отступ у заголовка */
+            margin-bottom: 10px; /* Отступ между заголовком и остальным содержимым */
+        }
+        .user-card p {
+            margin: 5px 0; /* Отступы для параграфов */
         }
     </style>
 </head>
 
 <body>
-    {{> header}}
-        {{> adminHeader}}
-       {{> back}}
+    {{> adminHeader}}
+    {{> back}}
     <div id="course-container">
         
         {{#each users}}
-        <div class="course-card">
+        <div class="user-card">
             <h2>{{this.Login}}</h2>
             <p>ID: {{this.ID}}</p>
             <p>Email: {{this.Email}}</p>

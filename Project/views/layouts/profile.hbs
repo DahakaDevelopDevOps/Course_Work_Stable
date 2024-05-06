@@ -3,15 +3,66 @@
 <head>
     <meta charset="UTF-8">
     <title>Ваш профиль</title>
-    {{!-- <link rel="stylesheet" href="styles.css"> --}}
-    <!-- можно вынести в отдельный partial весь <head></head> и параметром передавать css файлы -->
+<style>
+       body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f0f0;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        nav {
+            background-color: #4567b7;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+        }
+
+        nav ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+        }
+
+        nav ul li a {
+            color: #fff;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+        }
+
+        nav ul li a:hover {
+            background-color: #334ccc;
+        }
+    </style>
 </head>
 <body>
-    {{> profileHeader}}
-    {{> adminHeader}}
-    <a href="/admin">Назад к главной панели</a>
-    <h1>Добро пожаловать на ваш профиль</h1>
-
-    {{!-- {{> footer}} --}}
+    {{>header}}
+    <div class="container">
+        <h1>Добро пожаловать в ваш профиль</h1>
+        <nav>
+            <ul>
+                <li><a href="/profile/inprocess">Ваши курсы</a></li>
+                <li><a href="/profile/finished">Ваши завершенные курсы</a></li>
+            </ul>
+        </nav>
+    </div>
 </body>
 </html>

@@ -8,25 +8,75 @@
     <style>
         /* Стили для карточек курсов */
         .course-card {
+            background-color: #f9f9f9;
             border: 1px solid #ccc;
-            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            padding: 20px;
             margin: 10px;
+            max-width: 400px;
+            overflow: hidden;
+        }
+        .course-card h2 {
+            margin-top: 0;
+            margin-bottom: 10px;
+        }
+        .course-card p {
+            margin: 5px 0;
+        }
+        .course-card button {
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        .course-card button:hover {
+            background-color: #0056b3;
+        }
+        #add-course-button {
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            display: inline-block;
+            margin-top: 20px;
+            margin-bottom: 20px;
+            margin-right: 10px;
+        }
+        .back-button {
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 4px;
+            text-decoration: none;
+            display: inline-block;
+            margin-bottom: 20px;
+        }
+
+        #add-course-button:hover {
+            background-color: #0056b3;
         }
     </style>
 </head>
 
 <body>
     {{> adminHeader}}
-    <a href="/admin">Назад</a>
+    <a href="/admin" class="back-button">Назад</a>
 
-    <button id="add-course-button">Добавить новый курс</button> <!-- Кнопка для добавления нового курса -->
+    <button id="add-course-button">Добавить новый курс</button>
     
     <div id="course-container">
         {{#each courses}}
         <div class="course-card">
             <h2>{{this.course_name}}</h2>
             <p>ID: {{this.course_id}}</p>
-            <p>Продолжительность: {{ formatDate this.duration}}</p>
+            <p>Продолжительность в часах: {{this.duration }}</p>
             <p>Описание: {{this.description}}</p>
             <p>Надо знать: {{this.other_details}}</p>
             <button class="details-button" data-course-id="{{this.course_id}}">Изменить</button>
@@ -43,7 +93,7 @@
         document.querySelectorAll('.details-button').forEach(button => {
             button.addEventListener('click', () => {
                 const courseId = button.dataset.courseId;
-                window.location.href = `/admin/editcourse/${courseId}`; // Перенаправляем на страницу редактирования курса
+                window.location.href = `/admin/editcourse/${courseId}`; 
             });
         });
 
@@ -64,7 +114,8 @@
                 }
             });
         });
-         function formatDate(timeString) {
+        
+        function formatDate(timeString) {
             const date = new Date(timeString);
             const hours = String(date.getHours()).padStart(2, '0');
             const minutes = String(date.getMinutes()).padStart(2, '0');

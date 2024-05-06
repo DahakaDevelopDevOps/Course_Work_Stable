@@ -40,7 +40,7 @@ class EntryController {
                 }
             });
             if (existingEntry) {
-                return res.status(400).send('Вы уже записаны на этот курс');
+                res.status(400).send('Вы уже записаны на этот курс');
             }
     
             const newEntry = await models.Statistics.create({

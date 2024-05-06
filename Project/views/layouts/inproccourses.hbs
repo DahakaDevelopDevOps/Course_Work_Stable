@@ -6,30 +6,49 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Курсы</title>
     <style>
-        /* Стили для карточек курсов */
-        .course-card {
-            border: 1px solid #ccc;
-            padding: 10px;
-            margin: 10px;
-        }
+#back-to-profile-link,
+.updatestatus-button {
+    text-decoration: none;
+    color: #fff;
+    padding: 10px;
+    background-color: #007bff;
+    border: none;
+    border-radius: 5px;
+    display: inline-block;
+    margin-bottom: 20px;
+    cursor: pointer;
+}
+
+.updatestatus-button {
+    background-color: #28a745;
+}
+
+.updatestatus-button:hover {
+    background-color: #1e7e34;
+}
+.course-card {
+  border: 1px solid #007bff;
+  margin: 10px;
+  padding: 10px;
+}
     </style>
 </head>
 
 <body>
 
 
-    <a href="/profile">Назад к профилю</a>
-    <div id="course-container">
-        {{#each courses}}
-        <div class="course-card">
-            <h2>{{course_name}}</h2> 
-            <p>{{description}}</p>
-            <p>Продолжительность: {{formatDate duration}}</p> 
-            <p>Дата начала: {{start_date}}</p> 
-            <button class="updatestatus-button" data-course-id="{{course_id}}">Заранее завершить</button>
-        </div>
-        {{/each}}
+    <a id="back-to-profile-link" href="/profile">Назад к профилю</a>
+<div id="course-container">
+    {{#each courses}}
+    <div class="course-card">
+        <h2>{{course_name}}</h2> 
+        <p>{{description}}</p>
+        <p>Продолжительность: {{duration}}</p> 
+        <p>Дата начала: {{start_date}}</p>
+        <button class="updatestatus-button" data-course-id="{{course_id}}">Завершить</button>
     </div>
+    {{/each}}
+</div>
 
     <script>
         document.querySelectorAll('.updatestatus-button').forEach(button => {
