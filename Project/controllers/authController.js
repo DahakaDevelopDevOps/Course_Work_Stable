@@ -15,6 +15,10 @@ class AuthController {
         req.session.destroy();
         res.redirect('/');
     }
+    getStatus(req, res) {
+        const isAuthenticated = req.session.userId !== undefined;
+        res.json({ isAuthenticated: isAuthenticated });
+    }
 
 
    // В методе login
