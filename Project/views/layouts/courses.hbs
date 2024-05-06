@@ -21,19 +21,20 @@
     <select id="course-type-select">
         <option value="{{typeIn.type_id}}">{{typeIn.type_name}}</option>
         <option value="0">Все типы</option>
-        
+
         {{#each courseTypes}}
         <option value="{{this.type_id}}">{{this.type_name}}</option>
         {{/each}}
     </select>
+
+    <input type="text" id="search-input" placeholder="Поиск по названию курса">
 
     <div id="course-container">
         {{#each courses}}
         <div class="course-card">
             <h2>{{course_name}}</h2>
             <p>{{description}}</p>
-            <p>Duration: {{duration}}</p>
-            {{!-- добавь что-то еще --}}
+            <p>Продолжительность: {{formatDate duration}}</p>
             <button class="details-button" data-course-id="{{course_id}}">Подробнее</button>
         </div>
         {{/each}}
@@ -49,7 +50,7 @@
 
         document.getElementById('course-type-select').addEventListener('change', async (event) => {
             const selectedType = event.target.value;
-            if (selectedType && selectedType!= 0 ) {
+            if (selectedType && selectedType != 0) {
                 const currentUrl = new URL(window.location.href);
                 currentUrl.searchParams.set('type', selectedType);
                 window.location.href = currentUrl.toString();
@@ -58,6 +59,21 @@
                 window.location.href = '/courses';
             }
         });
+
+        document.getElementById('search-input').addEventListener('input', function () {
+            var searchText = this.value.toLowerCase();
+            var courseCards = document.querySelectorAll('.course-card');
+            courseCards.forEach(function (card) {
+                var name = card.querySelector('h2').textContent.toLowerCase();
+                var description = card.querySelector('p').textContent.toLowerCase();
+                if (name.includes(searchText) || description.includes(searchText)) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        });
+
     </script>
 
 </body>

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Курсы</title>
+    <style>
+        /* Стили для карточек курсов */
+        .course-card {
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    {{> header}}
+    {{> adminHeader}}
+    <a href="/admin">Назад</a>
+
+    <button id="add-course-button">Добавить новый курс</button> <!-- Кнопка для добавления нового курса -->
+    
+    <div id="course-container">
+        {{#each courses}}
+        <div class="course-card">
+            <h2>{{this.course_name}}</h2>
+            <p>ID: {{this.course_id}}</p>
+            <p>Продолжительность: {{this.duration}}</p>
+            <p>Описание: {{this.description}}</p>
+            <p>Надо знать: {{this.other_details}}</p>
+            <button class="details-button" data-course-id="{{this.course_id}}">Изменить</button>
+            <button class="delete-button" data-course-id="{{this.course_id}}">Удалить</button>
+        </div>
+        {{/each}}
+    </div>
+
+    <script>
+        document.getElementById('add-course-button').addEventListener('click', () => {
+            window.location.href = '/admin/addcourse'; 
+        });
+
+        document.querySelectorAll('.details-button').forEach(button => {
+            button.addEventListener('click', () => {
+                const courseId = button.dataset.courseId;
+                window.location.href = `/admin/editcourse/${courseId}`; // Перенаправляем на страницу редактирования курса
+            });
+        });
+
+        document.querySelectorAll('.delete-button').forEach(button => {
+            button.addEventListener('click', async () => {
+                const courseId = button.dataset.courseId;
+                try {
+                    const response = await fetch(`/admin/deleteCourse/${courseId}`, {
+                        method: 'DELETE'
+                    });
+                    if (response.ok) {
+                        window.location.reload();
+                    } else {
+                        console.error('Ошибка при удалении курса');
+                    }
+                } catch (error) {
+                    console.error('Ошибка при удалении курса:', error);
+                }
+            });
+        });
+    </script>
+
+</body>
+
+</html>

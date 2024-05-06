@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Курсы</title>
+    <style>
+        /* Стили для карточек курсов */
+        .course-card {
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    {{> header}}
+        {{> adminHeader}}
+        {{> back}}
+
+    <div id="course-container">
+        {{#each types}}
+        <div class="types-card">
+            <h2>{{type_name}}</h2>
+            <p>ID: {{this.type_id}}</p>
+            <p>Описание: {{this.description}}</p>
+            <p>Детали описание: {{this.other_details}}</p>
+        </div>
+        {{/each}}
+    </div>
+
+    <script>
+
+    </script>
+
+</body>
+
+</html>

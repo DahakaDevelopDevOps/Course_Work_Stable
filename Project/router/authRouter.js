@@ -8,7 +8,8 @@ authRouter
     .get('/register', authController.getRegisterPage)
     .post('/login', authController.login)
     .post('/register', authController.register)
-    .get('/logout', authController.logout);
+    .get('/logout', authController.logout)
+    .get('/status', authController.getStatus);
 
     
 module.exports = authRouter;

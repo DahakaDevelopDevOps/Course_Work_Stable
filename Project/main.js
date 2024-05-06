@@ -6,9 +6,17 @@ const io = require('socket.io')(http); // Подключаем Socket.IO к http
 const hbs = require('express-handlebars').create({
     extname: '.hbs',
     helpers: {
-        goBack: () => 'window.location.href = \'/\''
+        goBack: () => 'window.location.href = \'/\'',
+        formatDate: function(timeString) {
+            const date = new Date(timeString);
+            const hours = String(date.getHours()).padStart(2, '0');
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+            const seconds = String(date.getSeconds()).padStart(2, '0');
+            return `${hours}:${minutes}:${seconds}`;
+        }
     }
 });
+const dotenv = require("dotenv").config();
 const path = require('path'); // Добавим модуль path для работы с путями
 
 const port = 3000;

@@ -9,25 +9,18 @@ adminrouter
     .get('/courses', adminController.getCourses)
 
     // // Маршруты для операций с типами
-    // .get('/addtype', adminController.addTypeView)
+    // .get('/type/:id', adminController.getOneType)
     // .post('/addtype', adminController.addType)
     // .get('/updatetype', adminController.editTypeView)
     // .put('/updatetype', adminController.editType)
     // .delete('/deletetype', adminController.deleteType)
 
-    // // Маршруты для операций с классами
-    // .get('/addcourses', adminController.addCourseView)
-    // .post('/addcourse', adminController.addCourse)
-    // .get('/updatecourse', adminController.editCourseView)
-    // .put('/updatecourse', adminController.editCourselass)
-    // .delete('/deletecourse', adminController.deleteCourse)
-
-    // // Маршруты для операций с пользователями
-    // .get('/adduser', adminController.addUserView)
-    // .post('/adduser', adminController.addUser)
-    // .get('/updateuser', adminController.editUserView)
-    // .put('/updateuser', adminController.editUser)
-    // .delete('/deleteuser', adminController.deleteUser)
+    // // Маршруты для операций с курсами 
+    .get('/editcourse/:id', adminController.editCourseView)
+    .get('/addcourse', adminController.addCourseView)
+    .post('/addcourse', adminController.addCourse)
+    .post('/updatecourse/:id', adminController.updateCourse)
+    .delete('/deletecourse/:id', adminController.deleteCourse)
 
 
 module.exports = adminrouter;

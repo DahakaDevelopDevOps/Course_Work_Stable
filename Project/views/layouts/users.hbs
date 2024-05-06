@@ -16,8 +16,23 @@
 </head>
 
 <body>
-    {{> adminHeader}}
+    {{> header}}
+        {{> adminHeader}}
+       {{> back}}
+    <div id="course-container">
+        
+        {{#each users}}
+        <div class="course-card">
+            <h2>{{this.Login}}</h2>
+            <p>ID: {{this.ID}}</p>
+            <p>Email: {{this.Email}}</p>
+        </div>
+        {{/each}}
+    </div>
 
+    <script>
+
+    </script>
 
 </body>
 

@@ -3,7 +3,35 @@
         <ul>
             <li><a href="/courses">Курсы</a></li>
             <li><a href="/profile">Ваш профиль</a></li>
-            <li><a href="/auth/login">Вход</a></li>
+            <li id="login-logout"><a id="login-logout-link" href="/auth/login">Вход</a></li>
         </ul>
     </nav>
 </header>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+    const loginLogoutLink = document.getElementById('login-logout-link');
+    const xhr = new XMLHttpRequest();
+    xhr.onreadystatechange = function() {
+        if (xhr.readyState === XMLHttpRequest.DONE) {
+            if (xhr.status === 200) {
+                const isAuthenticated = JSON.parse(xhr.responseText).isAuthenticated;
+
+                // Изменяем текст и ссылку в зависимости от статуса аутентификации
+                if (isAuthenticated) {
+                    loginLogoutLink.textContent = 'Выход';
+                    loginLogoutLink.href = '/auth/logout';
+                } else {
+                    loginLogoutLink.textContent = 'Вход';
+                    loginLogoutLink.href = '/auth/login';
+                }
+            } else {
+                console.error('Произошла ошибка при выполнении AJAX-запроса');
+            }
+        }
+    };
+    xhr.open('GET', '/auth/status', true); // Путь '/auth/status' предполагает наличие на сервере соответствующего маршрута для проверки статуса аутентификации
+    xhr.send();
+});
+
+</script>

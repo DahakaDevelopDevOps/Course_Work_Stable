@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Course</title>
+    <style>
+        /* Add your CSS styles here */
+    </style>
+</head>
+
+<body>
+    <a href="/admin/courses">Назад</a>
+    <h1>Edit Course</h1>
+    <form action="/admin/updatecourse/{{course.course_id}}" method="POST">
+        <label for="courseName">Название курса:</label>
+        <input type="text" id="courseName" name="courseName" value="{{course.course_name}}">
+        <br>
+        <label for="description">Описание:</label>
+        <textarea id="description" name="description">{{course.description}}</textarea>
+        <br>
+        <label for="details">Навыки:</label>
+        <textarea id="details" name="details">{{course.other_details}}</textarea>
+        <br>
+        <label for="duration">Продолжительность:</label>
+        <input type="text" id="duration" name="duration" value="{{course.duration}}">
+        <br>
+
+        <select id="courseType" name="courseType">
+            <option value="{{course.course_type_id}}">{{type.type_name}}</option>
+            {{#each types}}
+                <option value="{{this.type_id}}">{{this.type_name}}</option>
+            {{/each}}
+        </select>
+
+        <button type="submit">Изменить</button>
+    </form>
+</body>
+
+</html>

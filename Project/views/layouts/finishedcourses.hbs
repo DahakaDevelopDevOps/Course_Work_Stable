@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Курсы</title>
+    <style>
+        /* Стили для карточек курсов */
+        .course-card {
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    {{> header}}
+
+    <a href="/profile">Назад к профилю</a>
+    <div id="course-container">
+        {{#each courses}}
+        <div class="course-card">
+            <h2>{{course_name}}</h2> 
+            <p>{{description}}</p>
+            <p>Продолжительность: {{formatDate duration}}</p> 
+            <p>Дата начала: {{start_date}}</p> 
+            <p>Дата окончания: {{end_date}}</p> 
+        </div>
+        {{/each}}
+    </div>
+
+    <script>
+        // Функция для форматирования времени
+        function formatDate(timeString) {
+            const date = new Date(timeString);
+            const hours = String(date.getHours()).padStart(2, '0');
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+            const seconds = String(date.getSeconds()).padStart(2, '0');
+            return `${hours}:${minutes}:${seconds}`;
+        }
+    </script>
+
+</body>
+
+</html>
