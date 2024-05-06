@@ -96,45 +96,82 @@ class AdminController {
         }
     }
 
-    //classes
+    //courses
 
-    //надо продумать с типами, чтобы добавлялся тип
-    async addCourse(req, res) {
+    async addCourseView(req, res) {
         try {
-            const { name, description, artType } = req.body;
-            await models.classes.create({
-                Name : name,
-                Description : description,
-                ArtType : artType
-            });
-            res.status(201).send('Класс успешно добавлен');
+            const types = await models.CourseTypes.findAll({ raw: true});
+            res.render("./layouts/addcourse.hbs", { layout: "addcourse.hbs", types: types});
         } catch (error) {
             console.error('Ошибка при добавлении класса:', error);
             res.status(500).send('Произошла ошибка при добавлении класса');
         }
     }
 
-    editCourseView(req, res) {
-        res.render("./layouts/users.hbs", { layout: "users.hbs", users:users });
+    async addCourse(req, res) {
+        try {
+            const { courseName, description, details, duration, courseType } = req.body;
+            await models.Courses.create({
+                course_name: courseName,
+                description: description,
+                other_details: details,
+                duration: duration,
+                course_type_id: courseType
+            });
+            res.redirect('/admin/courses');
+        } catch (error) {
+            console.error('Ошибка при добавлении курсв:', error);
+            res.status(500).send('Произошла ошибка при добавлении класса');
+        }
     }
 
-    async editcourse(req, res) {
-        const { id } = req.params;
+    async editCourseView(req, res) {
         try {
-            const { name, description, artType } = req.body;
-            const classInstance = await models.classes.findByPk(id);
-            if (!classInstance) {
-                return res.status(404).send('Класс не найден');
+            const courseId = req.params.id;
+            const course = await models.Courses.findByPk(courseId, { include: [models.CourseTypes], raw: true  });
+            if (!course) {
+                return res.status(404).send('Курс не найден');
             }
-            await classInstance.update({
-                Name : name,
-                Description : description,
-                ArtType : artType
-            });
-            res.send('Информация о классе успешно обновлена');
+            const typeId = course.course_type_id
+            const type = await models.CourseTypes.findByPk(typeId ,{ raw: true});
+            console.log(type);
+            const types = await models.CourseTypes.findAll({ raw: true});
+            res.render("./layouts/editcourse.hbs", { layout: "editcourse.hbs", course: course, type: type, types: types});
         } catch (error) {
             console.error('Ошибка при обновлении класса:', error);
             res.status(500).send('Произошла ошибка при обновлении класса');
+        }
+        
+    }
+
+    async updateCourse(req, res) {
+        try {
+            const courseId = req.params.id;
+            const { courseName, description, details, duration, courseType } = req.body; // Получаем данные из тела запроса
+            console.log(courseType);
+            const updatedCourse = await models.Courses.update(
+                {
+                    course_name: courseName,
+                    description: description,
+                    other_details: details,
+                    duration: duration,
+                    course_type_id: courseType // Обновляем тип курса
+                },
+                {
+                    where: { course_id: courseId } // Условие для поиска курса по его ID
+                }
+                
+            );
+    
+            if (updatedCourse[0] === 0) { // Проверяем, был ли обновлен хотя бы один курс
+                return res.status(404).send('Курс не найден');
+            }
+    
+            res.redirect('/admin/courses'); // Перенаправляем на главную страницу или куда-то еще
+    
+        } catch (error) {
+            console.error('Ошибка при обновлении курса:', error);
+            res.status(500).send('Произошла ошибка при обновлении курса');
         }
     }
 

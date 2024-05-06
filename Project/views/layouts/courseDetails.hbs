@@ -36,9 +36,8 @@
     <div class="container">
         <h1>Course Details</h1>
         <div class="course">
-            <p>Описание: {{course.description}}</p>
-            <p>Продолжительность: {{course.duration}}</p>
-            <p>Тип курса: {{type.type_name}}</p> <!-- Выводим название типа курса -->
+               {{> course}} 
+            <p>Тип курса: {{type.type_name}}</p> 
             <button class="details-button" data-course-id="{{course_id}}">Записаться!</button>
         </div>
         <a href="/courses">Назад</a>

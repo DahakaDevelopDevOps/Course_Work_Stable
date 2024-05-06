@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Course</title>
+    <style>
+        /* Add your CSS styles here */
+    </style>
+</head>
+
+<body>
+    <a href="/admin/courses">Назад</a>
+    <h1>Add Course</h1>
+    <form action="/admin/addcourse" method="POST">
+        <label for="courseName">Название курса:</label>
+        <input type="text" id="courseName" name="courseName" required>
+        <br>
+        <label for="description">Описание:</label>
+        <textarea id="description" name="description" required></textarea>
+        <br>
+        <label for="details">Навыки:</label>
+        <textarea id="details" name="details" required></textarea>
+        <br>
+        <label for="duration">Продолжительность:</label>
+        <input type="text" id="duration" name="duration" required pattern="^(0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$" title="Введите время в формате HH:MM">
+        <br>
+        <label for="courseType">Тип курса:</label>
+        <select id="courseType" name="courseType" required>
+            <option value="" disabled selected>Выберите тип курса</option>
+            {{#each types}}
+            <option value="{{this.type_id}}">{{this.type_name}}</option>
+            {{/each}}
+        </select>
+        <br>
+        <button type="submit">Добавить</button>
+    </form>
+</body>
+
+</html>

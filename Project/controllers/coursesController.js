@@ -31,7 +31,6 @@ class СoursesController {
     
 
     async getOneCourse(req, res) {
-       // const { id } = req.params;
         try {
             const courseId = req.params.id;
             const course = await models.Courses.findByPk(courseId, { include: [models.CourseTypes], raw: true  });

@@ -18,20 +18,37 @@
 <body>
     {{> header}}
 
+    <a href="/profile">Назад к профилю</a>
     <div id="course-container">
         {{#each courses}}
         <div class="course-card">
-            <h2>{{courses[]}}</h2> 
-            <h2>{{Course.duration}}</h2> 
-            <p>{{course_description}}</p>
-            <p>Duration: {{ duration}}</p> 
-            {{!-- <p>Duration: {{['Course.duration']}}</p> --}}
+            <h2>{{course_name}}</h2> 
+            <p>{{description}}</p>
+            <p>Продолжительность: {{formatDate duration}}</p> 
+            <p>Дата начала: {{start_date}}</p> 
+            <button class="updatestatus-button" data-course-id="{{course_id}}">Заранее завершить</button>
         </div>
         {{/each}}
     </div>
 
     <script>
-
+        document.querySelectorAll('.updatestatus-button').forEach(button => {
+            button.addEventListener('click', async () => {
+                const courseId = button.dataset.courseId;
+                try {
+                    const response = await fetch(`/profile/updateStatus/${courseId}`, {
+                        method: 'POST'
+                    });
+                    if (response.ok) {
+                        window.location.reload();
+                    } else {
+                        console.error('Ошибка при удалении курса');
+                    }
+                } catch (error) {
+                    console.error('Ошибка при удалении курса:', error);
+                }
+            });
+        });
     </script>
 
 </body>

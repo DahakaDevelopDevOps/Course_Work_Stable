@@ -102,7 +102,6 @@ class ProfileController {
 
     async  updateCourseStatus(req, res) {
         const { courseId } = req.params;
-        const { newStatus } = req.body;
     
         try {
             // Находим курс по courseId
@@ -113,7 +112,7 @@ class ProfileController {
             }
     
             // Обновляем статус курса
-            await course.update({ status_id: newStatus });
+            await course.update({ status_id: 1,  end_date: new Date() });
     
             res.status(200).send('Статус курса успешно обновлен');
         } catch (error) {

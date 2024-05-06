@@ -6,7 +6,8 @@ const entryController = require('../controllers/entryController');
 entryRouter
     .get('/', entryController.getEntry)
     //.get('/', entryController.getEntryForClass)
-    .post('/', entryController.addEntry)
+    .post('/submit/:id', entryController.addEntry)
+    //.post('/submit', entryController.addEntry)
    
 
 module.exports = entryRouter;

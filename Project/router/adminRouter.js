@@ -16,11 +16,11 @@ adminrouter
     // .delete('/deletetype', adminController.deleteType)
 
     // // Маршруты для операций с курсами 
-    .get('/editcourse/:courseId', adminController.editCourseView)
-    // .post('/addcourse', adminController.addCourse)
-    // .get('/updatecourse', adminController.editCourseView)
-    // .put('/updatecourse', adminController.editCourselass)
-    .delete('/deletecourse/:courseId', adminController.deleteCourse)
+    .get('/editcourse/:id', adminController.editCourseView)
+    .get('/addcourse', adminController.addCourseView)
+    .post('/addcourse', adminController.addCourse)
+    .post('/updatecourse/:id', adminController.updateCourse)
+    .delete('/deletecourse/:id', adminController.deleteCourse)
 
 
 module.exports = adminrouter;

@@ -18,8 +18,10 @@
 <body>
     {{> header}}
     {{> adminHeader}}
-    ><a href="/admin">Назад</a>
+    <a href="/admin">Назад</a>
 
+    <button id="add-course-button">Добавить новый курс</button> <!-- Кнопка для добавления нового курса -->
+    
     <div id="course-container">
         {{#each courses}}
         <div class="course-card">
@@ -35,6 +37,10 @@
     </div>
 
     <script>
+        document.getElementById('add-course-button').addEventListener('click', () => {
+            window.location.href = '/admin/addcourse'; 
+        });
+
         document.querySelectorAll('.details-button').forEach(button => {
             button.addEventListener('click', () => {
                 const courseId = button.dataset.courseId;
