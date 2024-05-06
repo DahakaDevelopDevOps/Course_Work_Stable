@@ -11,6 +11,9 @@
 </head>
 
 <body>
+    {{> adminHeader}}
+    <a href="/admin">Назад к главной панели</a>
+
     <a href="/admin/courses">Назад</a>
     <h1>Edit Course</h1>
     <form action="/admin/updatecourse/{{course.course_id}}" method="POST">
@@ -24,7 +27,7 @@
         <textarea id="details" name="details">{{course.other_details}}</textarea>
         <br>
         <label for="duration">Продолжительность:</label>
-        <input type="text" id="duration" name="duration" value="{{course.duration}}">
+        <input type="text" id="duration" name="duration" value="{{formatDate course.duration}}">
         <br>
 
         <select id="courseType" name="courseType">
@@ -36,6 +39,16 @@
 
         <button type="submit">Изменить</button>
     </form>
+
+    <script>
+         function formatDate(timeString) {
+            const date = new Date(timeString);
+            const hours = String(date.getHours()).padStart(2, '0');
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+            const seconds = String(date.getSeconds()).padStart(2, '0');
+            return `${hours}:${minutes}:${seconds}`;
+        }
+    </script>
 </body>
 
 </html>
