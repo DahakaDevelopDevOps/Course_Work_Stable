@@ -9,6 +9,7 @@ const hbs = require('express-handlebars').create({
         goBack: () => 'window.location.href = \'/\''
     }
 });
+const dotenv = require("dotenv").config();
 const path = require('path'); // Добавим модуль path для работы с путями
 
 const port = 3000;
