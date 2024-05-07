@@ -8,13 +8,6 @@ adminrouter
     .get('/types', adminController.getAllTypes)
     .get('/courses', adminController.getCourses)
 
-    // // Маршруты для операций с типами
-    // .get('/type/:id', adminController.getOneType)
-    // .post('/addtype', adminController.addType)
-    // .get('/updatetype', adminController.editTypeView)
-    // .put('/updatetype', adminController.editType)
-    // .delete('/deletetype', adminController.deleteType)
-
     // // Маршруты для операций с курсами 
     .get('/editcourse/:id', adminController.editCourseView)
     .get('/addcourse', adminController.addCourseView)

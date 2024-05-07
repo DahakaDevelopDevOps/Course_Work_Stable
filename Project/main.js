@@ -1,8 +1,11 @@
+const fs = require('fs');
 const express = require('express');
-const app = express();
+const http = require('http');
+const https = require('https');
 const expressSession = require('express-session');
-const http = require('http').Server(app); // Подключаем http-сервер к Express
-const io = require('socket.io')(http); // Подключаем Socket.IO к http-серверу
+const bodyParser = require('body-parser');
+const router = require('./router/index');
+const path = require('path');
 const hbs = require('express-handlebars').create({
     extname: '.hbs',
     helpers: {
@@ -17,24 +20,11 @@ const hbs = require('express-handlebars').create({
     }
 });
 const dotenv = require("dotenv").config();
-const path = require('path'); // Добавим модуль path для работы с путями
 
+const app = express();
 const port = 3000;
-const bodyParser = require('body-parser');
-const router = require('./router/index');
 
-if (process.env.NODE_ENV === "development") {
-    const liveReaload = require('livereload');
-    const connectLiveReload = require('connect-livereload');
-    const liveReloadServer = liveReaload.createServer();
-    liveReloadServer.watch(path.join(__dirname, 'views'));
-    liveReloadServer.server.once("connection", () => {
-        setTimeout(() => {
-            liveReloadServer.refresh("/");
-        }, 100);
-    });
-    app.use(connectLiveReload());
-}
+// Express configuration
 app.use(expressSession({
     secret: 'SECRET',
     resave: false,
@@ -47,7 +37,17 @@ app.use(express.static(__dirname + '/public'));
 app.use(bodyParser.json());
 app.use('/', router);
 
+// HTTP Server
+const httpServer = http.createServer(app);
+
+// HTTPS Server
+const privateKey = fs.readFileSync('sslcert/server.key', 'utf8');
+const certificate = fs.readFileSync('sslcert/server.crt', 'utf8');
+const credentials = { key: privateKey, cert: certificate };
+const httpsServer = https.createServer(credentials, app);
+
 // Обработчик соединения с веб-сокетом
+const io = require('socket.io')(httpServer); // Используем httpServer для Socket.IO
 io.on('connection', (socket) => {
     console.log('a user connected');
 
@@ -57,7 +57,11 @@ io.on('connection', (socket) => {
     });
 });
 
-// Заменяем app.listen() на http.listen() для использования http-сервера с веб-сокетами
-http.listen(process.env.PORT || port, () => {
-    console.log(`http://localhost:${port}`);
+// Запуск серверов
+httpServer.listen(port, () => {
+    console.log(`HTTP Server running on http://localhost:${port}`);
+});
+
+httpsServer.listen(8443, () => {
+    console.log('HTTPS Server running on https://localhost:8443');
 });

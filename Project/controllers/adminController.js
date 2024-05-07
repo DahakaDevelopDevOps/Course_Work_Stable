@@ -1,16 +1,39 @@
+const { where } = require('sequelize');
 const { models } = require('../db/utils/db');
+// Функция для проверки роли администратора
+async function isAdmin(req, res, next) {
+    const id = req.session.userId;
+    if (id) {
+        const user = await models.Users.findByPk(id, { raw: true });
+        if (user && user.Role === 1) { 
+            next(); // Продолжаем выполнение следующего middleware'а или обработчика маршрута
+        } else {
+            res.status(403).send('Ты не админ!!!'); // Возвращаем статус 403 (Запрещено) в случае отсутствия доступа
+        }
+    } else {
+        res.status(403).send('Не зарегистрирован'); // Возвращаем статус 403 (Запрещено), если пользователь не авторизован
+    }
+}
 
 class AdminController {
 
-    getAdminPage(req, res) {
-        res.render("./layouts/admin.hbs", { layout: "admin.hbs" });
+    async getAdminPage(req, res) {
+        try {
+            await isAdmin(req, res, async () => {
+                res.render("./layouts/admin.hbs", { layout: "admin.hbs" }); 
+            });
+        } catch (error) {
+            console.error('Ошибка при проверке роли администратора:', error);
+            res.status(500).send('Произошла ошибка при проверке роли администратора');
+        }
     }
 
     async getAllUsers(req, res) {
         try {
-            const users = await models.Users.findAll({ raw: true});
-            res.render("./layouts/users.hbs", { layout: "users.hbs", users:users });
-
+            await isAdmin(req, res, async () => {
+                const users = await models.Users.findAll({ raw: true });
+                res.render("./layouts/users.hbs", { layout: "users.hbs", users: users });
+            });
         } catch (error) {
             console.error('Ошибка при получении пользователей:', error);
             res.status(500).send('Произошла ошибка при получении пользователей');
@@ -19,8 +42,10 @@ class AdminController {
 
     async getAllTypes(req, res) {
         try {
-            const types = await models.CourseTypes.findAll({ raw: true});
-            res.render("./layouts/types.hbs", { layout: "types.hbs", types:types });
+            await isAdmin(req, res, async () => {
+                const types = await models.CourseTypes.findAll({ raw: true });
+                res.render("./layouts/types.hbs", { layout: "types.hbs", types: types });
+            });
         } catch (error) {
             console.error('Ошибка при получении расписания:', error);
             res.status(500).send('Произошла ошибка при получении расписания');
@@ -29,52 +54,31 @@ class AdminController {
 
     async getCourses(req, res) {
         try {
-            const courses = await models.Courses.findAll({
-                include: [models.CourseTypes],
-                raw: true
+            await isAdmin(req, res, async () => {
+                const courses = await models.Courses.findAll({ include: [models.CourseTypes], raw: true });
+                res.render("./layouts/courseUpdating.hbs", { layout: "courseUpdating.hbs", courses: courses });
             });
-            console.log("курсы в админке"+ courses[0])
-            res.render("./layouts/courseUpdating.hbs", { layout: "courseUpdating.hbs", courses:courses });
         } catch (error) {
             console.error('Ошибка при получении записей на курсы:', error);
             res.status(500).send('Произошла ошибка при получении записей на курсы');
         }
     }
 
-   
-    // types 
-
-    addTypeView(req, res) {
-        res.render('addType');
-    }
-
-    async addType(req, res) {
-        try {
-            const { TypeName, Description } = req.body;
-            await models.types.create({
-                TypeName,
-                Description
-            });
-            res.status(201).send('Тип успешно добавлен');
-        } catch (error) {
-            console.error('Ошибка при добавлении типа:', error);
-            res.status(500).send('Произошла ошибка при добавлении типа');
-        }
-    }
-
     async editType(req, res) {
-        const { id } = req.params;
         try {
-            const { typeName, description } = req.body;
-            const type = await models.types.findByPk(id);
-            if (!type) {
-                return res.status(404).send('Тип не найден');
-            }
-            await type.update({
-                 TypeName : typeName ,
-                Description: description  
+            await isAdmin(req, res, async () => {
+                const { id } = req.params;
+                const { typeName, description } = req.body;
+                const type = await models.types.findByPk(id);
+                if (!type) {
+                    return res.status(404).send('Тип не найден');
+                }
+                await type.update({
+                    TypeName: typeName,
+                    Description: description
+                });
+                res.send('Информация о типе успешно обновлена');
             });
-            res.send('Информация о типе успешно обновлена');
         } catch (error) {
             console.error('Ошибка при обновлении типа:', error);
             res.status(500).send('Произошла ошибка при обновлении типа');
@@ -82,26 +86,28 @@ class AdminController {
     }
 
     async deleteType(req, res) {
-        const { id } = req.params;
         try {
-            const type = await models.types.findByPk(id);
-            if (!type) {
-                return res.status(404).send('Тип не найден');
-            }
-            await type.destroy();
-            res.send('Тип успешно удален');
+            await isAdmin(req, res, async () => {
+                const { id } = req.params;
+                const type = await models.types.findByPk(id);
+                if (!type) {
+                    return res.status(404).send('Тип не найден');
+                }
+                await type.destroy();
+                res.send('Тип успешно удален');
+            });
         } catch (error) {
             console.error('Ошибка при удалении типа:', error);
             res.status(500).send('Произошла ошибка при удалении типа');
         }
     }
 
-    //courses
-
     async addCourseView(req, res) {
         try {
-            const types = await models.CourseTypes.findAll({ raw: true});
-            res.render("./layouts/addcourse.hbs", { layout: "addcourse.hbs", types: types});
+            await isAdmin(req, res, async () => {
+                const types = await models.CourseTypes.findAll({ raw: true });
+                res.render("./layouts/addcourse.hbs", { layout: "addcourse.hbs", types: types });
+            });
         } catch (error) {
             console.error('Ошибка при добавлении класса:', error);
             res.status(500).send('Произошла ошибка при добавлении класса');
@@ -110,80 +116,101 @@ class AdminController {
 
     async addCourse(req, res) {
         try {
-            const { courseName, description, details, duration, courseType } = req.body;
-    
-            // Проверяем, является ли продолжительность числом
-            if (isNaN(duration)) {
-                return res.status(400).send('Продолжительность должна быть числом');
-            }
-    
-            // Проверяем, существует ли указанный идентификатор типа курса
-            const courseTypeExists = await models.CourseTypes.findByPk(courseType);
-            if (!courseTypeExists) {
-                return res.status(404).send('Указанный тип курса не существует');
-            }
-    
-            // Создаем курс
-            await models.Courses.create({
-                course_name: courseName,
-                description: description,
-                other_details: details,
-                duration: duration,
-                course_type_id: courseType
+            await isAdmin(req, res, async () => {
+                const { courseName, description, details, duration, courseType } = req.body;
+
+                // Проверяем, является ли продолжительность числом
+                if (isNaN(duration)) {
+                    return res.status(400).send('Продолжительность должна быть числом');
+                }
+
+                // Проверяем, существует ли указанный идентификатор типа курса
+                const courseTypeExists = await models.CourseTypes.findByPk(courseType);
+                if (!courseTypeExists) {
+                    return res.status(404).send('Указанный тип курса не существует');
+                }
+
+                // Создаем курс
+                await models.Courses.create({
+                    course_name: courseName,
+                    description: description,
+                    other_details: details,
+                    duration: duration,
+                    course_type_id: courseType
+                });
+
+                res.redirect('/admin/courses');
             });
-    
-            res.redirect('/admin/courses');
         } catch (error) {
             console.error('Ошибка при добавлении курса:', error);
             res.status(500).send('Произошла ошибка при добавлении курса');
         }
     }
-    
 
     async editCourseView(req, res) {
         try {
-            const courseId = req.params.id;
-            const course = await models.Courses.findByPk(courseId, { include: [models.CourseTypes], raw: true  });
-            if (!course) {
-                return res.status(404).send('Курс не найден');
-            }
-            const typeId = course.course_type_id
-            const type = await models.CourseTypes.findByPk(typeId ,{ raw: true});
-            console.log(type);
-            const types = await models.CourseTypes.findAll({ raw: true});
-            res.render("./layouts/editcourse.hbs", { layout: "editcourse.hbs", course: course, type: type, types: types});
+            await isAdmin(req, res, async () => {
+                const courseId = req.params.id;
+                const course = await models.Courses.findByPk(courseId, { include: [models.CourseTypes], raw: true });
+                if (!course) {
+                    return res.status(404).send('Курс не найден');
+                }
+                const typeId = course.course_type_id
+                const type = await models.CourseTypes.findByPk(typeId, { raw: true });
+                console.log(type);
+                const types = await models.CourseTypes.findAll({ raw: true });
+                res.render("./layouts/editcourse.hbs", { layout: "editcourse.hbs", course: course, type: type, types: types });
+            });
         } catch (error) {
             console.error('Ошибка при обновлении класса:', error);
             res.status(500).send('Произошла ошибка при обновлении класса');
         }
-        
     }
 
     async updateCourse(req, res) {
         try {
-            const courseId = req.params.id;
-            const { courseName, description, details, duration, courseType } = req.body; // Получаем данные из тела запроса
-            console.log(courseType);
-            const updatedCourse = await models.Courses.update(
-                {
-                    course_name: courseName,
-                    description: description,
-                    other_details: details,
-                    duration: duration,
-                    course_type_id: courseType // Обновляем тип курса
-                },
-                {
-                    where: { course_id: courseId } // Условие для поиска курса по его ID
+            await isAdmin(req, res, async () => {
+                const courseId = req.params.id;
+                const { courseName, description, details, duration, courseType } = req.body; 
+
+                // Проверка продолжительности курса
+                if (duration <= 0 || duration >= 1000) {
+                    return res.status(400).send('Продолжительность курса должна быть больше 0 и меньше 1000');
                 }
-                
-            );
-    
-            if (updatedCourse[0] === 0) { // Проверяем, был ли обновлен хотя бы один курс
-                return res.status(404).send('Курс не найден');
-            }
-    
-            res.redirect('/admin/courses'); // Перенаправляем на главную страницу или куда-то еще
-    
+
+                // Проверка наличия курса с таким же именем
+                const existingCourse = await models.Courses.findOne({
+                    where: {
+                        course_name: courseName,
+                        course_id: { [Op.not]: courseId } 
+                    }
+                });
+
+                if (existingCourse) {
+                    return res.status(400).send('Курс с таким именем уже существует');
+                }
+
+                // Обновление курса
+                const updatedCourse = await models.Courses.update(
+                    {
+                        course_name: courseName,
+                        description: description,
+                        other_details: details,
+                        duration: duration,
+                        course_type_id: courseType 
+                    },
+                    {
+                        where: { course_id: courseId } 
+                    }
+                );
+
+                if (updatedCourse[0] === 0) { 
+                    return res.status(404).send('Курс не найден');
+                }
+
+                res.redirect('/admin/courses'); 
+
+            });
         } catch (error) {
             console.error('Ошибка при обновлении курса:', error);
             res.status(500).send('Произошла ошибка при обновлении курса');
@@ -191,24 +218,26 @@ class AdminController {
     }
 
     async deleteCourse(req, res) {
-        const  courseId  = req.params.id;
         try {
-
-            console.log('Удаление')
-            console.log(courseId)
-            const classInstance = await models.Courses.findByPk(courseId);
-            if (!classInstance) {
-                console.log('не Завершено')
-                return res.status(404).send('Класс не найден');
-            }
-            await classInstance.destroy();
-            console.log('Завершено')
-            res.send('Класс успешно удален');
+            await isAdmin(req, res, async () => {
+                const courseId = req.params.id;
+                console.log('Удаление');
+                console.log(courseId);
+                const courseInstance = await models.Courses.findByPk(courseId);
+                if (!courseInstance) {
+                    console.log('не Завершено');
+                    return res.status(404).send('Курс не найден');
+                }
+                await courseInstance.destroy();
+                console.log('Завершено');
+                res.send('Курс успешно удален');
+            });
         } catch (error) {
-            console.error('Ошибка при удалении класса:', error);
-            res.status(500).send('Произошла ошибка при удалении класса');
+            console.error('Ошибка при удалении курса:', error);
+            res.status(500).send('Произошла ошибка при удалении курса');
         }
     }
+    
 
 }
 
