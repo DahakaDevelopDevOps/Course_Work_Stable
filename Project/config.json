@@ -1,0 +1,15 @@
+{
+    "development": {
+      "username": "cw",
+      "password": "1111",
+      "database": "CourseWork",
+      "host": "localhost",
+      "dialect": "mssql",
+      "port": 1433,
+      "dialectOptions": {
+        "options": {
+          "encrypt": true 
+        }
+      }
+    }
+  }
