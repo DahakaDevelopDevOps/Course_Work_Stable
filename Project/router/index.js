@@ -10,7 +10,7 @@ const adminRouter = require("./adminRouter");
 router.use("/", homeRouter);
 router.use("/auth", authRouter);
 router.use("/courses", courseRouter);
-router.use("/profile", profileRouter); //штука со статистикой
+router.use("/profile", profileRouter); 
 router.use("/entry", entryRouter);
 router.use("/admin", adminRouter);
 

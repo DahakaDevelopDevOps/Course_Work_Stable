@@ -3,46 +3,74 @@
 <head>
     <meta charset="UTF-8">
     <title>Главная страница</title>
-    {{!-- <link rel="stylesheet" href="styles.css"> --}}
-    <!-- можно вынести в отдельный partial весь <head></head> и параметром передавать css файлы -->
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f0f0;
+            text-align: center; /* Выравнивание текста по центру */
+        }
+
+        h1, h2 {
+            color: #333;
+        }
+
+        #course-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-around;
+            margin-top: 20px;
+        }
+
+        .types-card {
+            width: 45%; /* Ширина карточки */
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .types-card h2 {
+            margin-top: 0;
+            font-size: 24px;
+            color: #333;
+        }
+
+        .types-card p {
+            color: #666;
+            font-size: 16px;
+        }
+
+        .btn {
+            display: inline-block;
+            background-color: #007bff;
+            color: #fff;
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+
+        .btn:hover {
+            background-color: #0056b3;
+        }
+    </style>
 </head>
 <body>
-
+    {{> header}}
     <h1>Добро пожаловать на главную страницу!</h1>
-<nav style="background-color: #007bff; padding: 10px;">
-    <ul style="list-style: none; margin: 0; padding: 0; display: flex; justify-content: space-between;">
-        <li style="margin-right: 20px;"><a href="/courses" style="color: #ffffff; text-decoration: none; font-size: 20px; font-weight: bold;">Курсы</a></li>
-        <li style="margin-right: 20px;"><a href="/profile" style="color: #ffffff; text-decoration: none; font-size: 20px; font-weight: bold;">Ваш профиль</a></li>
-        <li id="login-logout" style="margin-right: 20px;"><a id="login-logout-link" href="/auth/login" style="color: #ffffff; text-decoration: none; font-size: 20px; font-weight: bold;">Вход</a></li>
-    </ul>
-</nav>
-    {{!-- {{> footer}} --}}
+    <h2>Мы предоставляем курсы по этим направлениям:</h2>
+    <div id="course-container">
+        {{#each types}}
+        <div class="types-card">
+            <h2>{{type_name}}</h2>
+            <p>{{this.description}}</p>
+        </div>
+        {{/each}}
+    </div>
+    <a href="/courses" class="btn">Перейти к курсам</a>
 </body>
 </html>
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-    const loginLogoutLink = document.getElementById('login-logout-link');
-    const xhr = new XMLHttpRequest();
-    xhr.onreadystatechange = function() {
-        if (xhr.readyState === XMLHttpRequest.DONE) {
-            if (xhr.status === 200) {
-                const isAuthenticated = JSON.parse(xhr.responseText).isAuthenticated;
-
-                // Изменяем текст и ссылку в зависимости от статуса аутентификации
-                if (isAuthenticated) {
-                    loginLogoutLink.textContent = 'Выход';
-                    loginLogoutLink.href = '/auth/logout';
-                } else {
-                    loginLogoutLink.textContent = 'Вход';
-                    loginLogoutLink.href = '/auth/login';
-                }
-            } else {
-                console.error('Произошла ошибка при выполнении AJAX-запроса');
-            }
-        }
-    };
-    xhr.open('GET', '/auth/status', true); // Путь '/auth/status' предполагает наличие на сервере соответствующего маршрута для проверки статуса аутентификации
-    xhr.send();
-});
-
-</script>

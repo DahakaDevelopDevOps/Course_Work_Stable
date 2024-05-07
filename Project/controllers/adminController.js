@@ -111,6 +111,19 @@ class AdminController {
     async addCourse(req, res) {
         try {
             const { courseName, description, details, duration, courseType } = req.body;
+    
+            // Проверяем, является ли продолжительность числом
+            if (isNaN(duration)) {
+                return res.status(400).send('Продолжительность должна быть числом');
+            }
+    
+            // Проверяем, существует ли указанный идентификатор типа курса
+            const courseTypeExists = await models.CourseTypes.findByPk(courseType);
+            if (!courseTypeExists) {
+                return res.status(404).send('Указанный тип курса не существует');
+            }
+    
+            // Создаем курс
             await models.Courses.create({
                 course_name: courseName,
                 description: description,
@@ -118,12 +131,14 @@ class AdminController {
                 duration: duration,
                 course_type_id: courseType
             });
+    
             res.redirect('/admin/courses');
         } catch (error) {
-            console.error('Ошибка при добавлении курсв:', error);
-            res.status(500).send('Произошла ошибка при добавлении класса');
+            console.error('Ошибка при добавлении курса:', error);
+            res.status(500).send('Произошла ошибка при добавлении курса');
         }
     }
+    
 
     async editCourseView(req, res) {
         try {
