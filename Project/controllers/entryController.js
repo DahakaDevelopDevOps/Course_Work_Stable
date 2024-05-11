@@ -63,7 +63,7 @@ async addEntry(req, res) {
             from: 'courseproject@gmail.com',
             to: email, // Используем email, указанный пользователем при записи
             subject: 'Вы успешно записались на курс',
-            text: 'Спасибо за ваш выбор! Вы успешно записались на курс. Пройти его можно по ссылке: https://drive.google.com/file/d/1uCOfNp2l2hs1IMO5f9TNzOOVn7hoAIc4/view?usp=sharing'
+            text: 'Спасибо за ваш выбор! Вы успешно записались на курс. В личном кабинете вы сможете пройти его'
         };
 
         transporter.sendMail(mailOptions, function(error, info) {

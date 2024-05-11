@@ -54,6 +54,9 @@ async login(req, res) {
 async register(req, res) {
     const { username, email, password } = req.body;
     const hashedPassword = bcrypt.hashSync(password, 10);
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            res.status(500).send('Введён неправильный адрес электронной почты, повторите попытку');        }
     const candidate = await models.Users.findOne({
         where: {
             Login: username,
