@@ -3,6 +3,9 @@ const courses = require("./courses");
 const status = require("./status");
 const statistics = require("./statistics");
 const courseTypes = require("./types");
+const videos = require("./videos");
+const tasks = require("./tasks");
+const answers = require("./answers");
 
 const { DataTypes } = require('sequelize');
 
@@ -12,6 +15,9 @@ function initModels(sequelize) {
   const Status = status(sequelize, DataTypes);
   const Statistics = statistics(sequelize, DataTypes);
   const CourseTypes = courseTypes(sequelize, DataTypes);
+  const Videos = videos(sequelize, DataTypes);
+  const Tasks= tasks(sequelize, DataTypes);
+  const Answers = answers(sequelize, DataTypes);
 
   Statistics.belongsTo(Users, { foreignKey: 'user_id', onDelete: 'CASCADE' });
   Users.hasMany(Statistics, { foreignKey: 'user_id', onDelete: 'CASCADE' });
@@ -20,16 +26,28 @@ function initModels(sequelize) {
   Statistics.belongsTo(Status, { foreignKey: 'status_id', onDelete: 'CASCADE' });
   Status.hasMany(Statistics, { foreignKey: 'status_id', onDelete: 'CASCADE' });
 
-  // Связи для таблицы Courses и CourseTypes с каскадным удалением
+
   Courses.belongsTo(CourseTypes, { foreignKey: 'course_type_id', onDelete: 'CASCADE' });
   CourseTypes.hasMany(Courses, { foreignKey: 'course_type_id', onDelete: 'CASCADE' });
+
+  Videos.belongsTo(Courses, { foreignKey: 'course_id', onDelete: 'CASCADE' });
+  Courses.hasMany(Videos, { foreignKey: 'course_id', onDelete: 'CASCADE' });
+
+  Tasks.belongsTo(Courses, { foreignKey: 'course_id', onDelete: 'CASCADE' });
+  Courses.hasMany(Tasks, { foreignKey: 'course_id', onDelete: 'CASCADE' });
+
+  Answers.belongsTo(Tasks, { foreignKey: 'test_id', onDelete: 'CASCADE' });
+  Tasks.hasMany(Answers, { foreignKey: 'test_id', onDelete: 'CASCADE' });
 
   return {
     Users,
     Courses,
     Status,
     Statistics,
-    CourseTypes
+    CourseTypes,
+    Videos,
+    Tasks,
+    Answers
   };
 }
 
