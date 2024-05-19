@@ -3,7 +3,7 @@ const {  DataTypes } = require('sequelize');
 const  { Sequelize } = require("sequelize");
 
 
-const connection = new Sequelize('CourseWork', 'cw', '1111', {
+const connection = new Sequelize('busia', 'sa', '1111', {
     host: 'localhost',
     dialect: 'mssql',
     port: 1433,
