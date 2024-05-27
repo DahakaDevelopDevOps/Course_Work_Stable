@@ -33,15 +33,16 @@
     {{> back}}
     <h1>Manage Course Types</h1>
     <h2>Add New Type</h2>
-    <form id="add-type-form" action="/admin/addType">
-        <label for="new-type-name">Type Name:</label>
-        <input type="text" id="new-type-name" required>
-        <label for="new-description">Description:</label>
-        <input type="text" id="new-description">
-        <label for="new-other-details">Other Details:</label>
-        <input type="text" id="new-other-details">
+    <form id="add-type-form" action="/admin/addType" method="post">
+        <label for="typeName">Type Name:</label>
+        <input type="text" id="typeName" name="typeName" required>
+        <label for="description">Description:</label>
+        <input type="text" id="description" name="description">
+        <label for="otherDetails">Other Details:</label>
+        <input type="text" id="otherDetails" name="otherDetails">
         <button type="submit">Add Type</button>
     </form>
+
     <div id="course-types-container">
         {{#each types}}
         <div class="card" id="card-{{this.type_id}}">
@@ -55,48 +56,63 @@
             <div class="edit-form" id="edit-form-{{this.type_id}}">
                 <form onsubmit="updateType(event, {{this.type_id}})">
                     <label for="edit-type-name-{{this.type_id}}">Type Name:</label>
-                    <input type="text" id="edit-type-name-{{this.type_id}}" value="{{this.type_name}}" required>
+                    <input type="text" id="edit-type-name-{{this.type_id}}" name="type_name" value="{{this.type_name}}"
+                        required>
                     <label for="edit-description-{{this.type_id}}">Description:</label>
-                    <input type="text" id="edit-description-{{this.type_id}}" value="{{this.description}}">
+                    <input type="text" id="edit-description-{{this.type_id}}" name="description"
+                        value="{{this.description}}">
                     <label for="edit-other-details-{{this.type_id}}">Other Details:</label>
-                    <input type="text" id="edit-other-details-{{this.type_id}}" value="{{this.other_details}}">
+                    <input type="text" id="edit-other-details-{{this.type_id}}" name="other_details"
+                        value="{{this.other_details}}">
                     <button type="submit">Update</button>
                     <button type="button" onclick="hideEditForm({{this.type_id}})">Cancel</button>
                 </form>
             </div>
+
         </div>
         {{/each}}
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            async function updateType(event, typeId) {
-                event.preventDefault();
+       document.addEventListener('DOMContentLoaded', () => {
+    async function updateType(event, typeId) {
+        event.preventDefault();
 
-                const typeName = document.getElementById(`edit-type-name-${typeId}`).value;
-                const description = document.getElementById(`edit-description-${typeId}`).value;
-                const otherDetails = document.getElementById(`edit-other-details-${typeId}`).value;
+        const typeName = document.getElementById(`edit-type-name-${typeId}`).value;
+        const description = document.getElementById(`edit-description-${typeId}`).value;
+        const otherDetails = document.getElementById(`edit-other-details-${typeId}`).value;
 
-                try {
-                    const response = await fetch(`/admin/editType/${typeId}`, {
-                        method: 'PUT',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({ type_name: typeName, description, other_details: otherDetails })
-                    });
+        console.log('Updating type with data:', { type_name: typeName, description, other_details: otherDetails });
 
-                    if (!response.ok) {
-                        throw new Error('Failed to update type');
-                    }
+        try {
+            const response = await fetch(`/admin/editType/${typeId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ type_name: typeName, description: description, other_details: otherDetails })
+            });
 
-                    alert('Type updated successfully');
-                    location.reload();
-                } catch (error) {
-                    console.error('Error updating type:', error);
-                    alert('Error updating type');
-                }
+            if (!response.ok) {
+                throw new Error('Failed to update type');1
             }
+
+            alert('Type updated successfully');
+            location.reload();
+        } catch (error) {
+            console.error('Error updating type:', error);
+            alert('Error updating type');
+        }
+    }
+
+    document.querySelectorAll('.edit-form form').forEach(form => {
+        form.addEventListener('submit', event => {
+            const typeId = form.closest('.card').getAttribute('id').split('-')[1];
+            updateType(event, typeId);
+        });
+    });
+});
+
 
             document.querySelectorAll('.delete-button').forEach(button => {
                 button.addEventListener('click', async () => {
@@ -119,7 +135,7 @@
                 });
             });
 
-           
+
             window.showEditForm = (typeId) => {
                 document.getElementById(`edit-form-${typeId}`).style.display = 'block';
             };

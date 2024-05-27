@@ -1,6 +1,11 @@
 const { where } = require('sequelize');
 const { models } = require('../db/utils/db');
 const answers = require('../db/models/answers');
+const { raw } = require('express');
+const base64Encode = (data) => {
+    if (!data) return '';
+    return Buffer.from(data).toString('base64');
+};
 
 // Функция для проверки роли администратора
 async function isAdmin(req, res, next) {
@@ -70,7 +75,7 @@ class AdminController {
             await isAdmin(req, res, async () => {
                 const courses = await models.Courses.findAll({ include: [models.CourseTypes], raw: true });
                 const videos = await models.Videos.findAll({ include: [models.Courses], raw: true })
-                res.render("./layouts/courseUpdating.hbs", { layout: "courseUpdating.hbs", videos: videos, courses: courses });
+                res.render("./layouts/videos.hbs", { layout: "videos.hbs", videos: videos, courses: courses });
             });
         } catch (error) {
             console.error('Ошибка при получении записей на курсы:', error);
@@ -96,7 +101,7 @@ class AdminController {
         try {
             await isAdmin(req, res, async () => {
                 const { id } = req.params;
-                const { typeName, description } = req.body;
+                const { type_name, description, other_details } = req.body;
                 const type = await models.types.findByPk(id);
                 if (!type) {
                     return res.status(404).send('Тип не найден');
@@ -179,17 +184,33 @@ class AdminController {
                 if (!course) {
                     return res.status(404).send('Курс не найден');
                 }
-                const typeId = course.course_type_id
+                const typeId = course.course_type_id;
                 const type = await models.CourseTypes.findByPk(typeId, { raw: true });
-                console.log(type);
                 const types = await models.CourseTypes.findAll({ raw: true });
-                res.render("./layouts/editcourse.hbs", { layout: "editcourse.hbs", course: course, type: type, types: types });
+                const videos = await models.Videos.findAll({
+                    where: { course_id: courseId },
+                    raw: true
+                });
+    
+                // Кодирование данных видео в base64
+                const encodedVideos = videos.map(video => ({
+                    ...video,
+                    base64Data: base64Encode(video.video_content) // Закодированные данные видео
+                }));
+                res.render("./layouts/editcourse.hbs", {
+                    layout: "editcourse.hbs",
+                    course: course,
+                    type: type,
+                    types: types,
+                    videos: encodedVideos
+                });
             });
         } catch (error) {
             console.error('Ошибка при обновлении класса:', error);
             res.status(500).send('Произошла ошибка при обновлении класса');
         }
     }
+    
 
     async updateCourse(req, res) {
         try {
@@ -237,39 +258,14 @@ class AdminController {
         }
     }
 
-    async editType(req, res) {
-        const { id } = req.params;
-        try {
-            await isAdmin(req, res, async () => {
-                const { typeName, description, other_details } = req.body;
-                const type = await models.CourseTypes.findByPk(id, { raw: true });
-                if (!type) {
-                    return res.status(404).send('Тип не найден');
-                }
-                await models.types.update({
-                    TypeName: typeName,
-                    description: description,
-                    other_details: other_details
-                },
-                    {
-                        where: { TypeId: id }
-                    });
-                return res.render('./layouts/infoAdmin.hbs', { layout: "infoAdmin.hbs", message: 'Информация о типе успешно обновлена' });
-            });
 
-        } catch (error) {
-            console.error('Ошибка при обновлении типа:', error);
-            res.status(500).send('Произошла ошибка при обновлении типа');
-        }
-    }
 
     async addType(req, res) {
         try {
             await isAdmin(req, res, async () => {
-                console.log('I am here')
-                const { type_name, description, other_details } = req.body;
-                await models.CourseTypes.create({ type_name, description, other_details });
-                res.status(201).send('Type added successfully');
+                const { typeName, description, otherDetails } = req.body;
+                await models.CourseTypes.create({ type_name: typeName, description: description, other_details: otherDetails });
+                res.redirect('/admin/types');
             });
         } catch (error) {
             console.error('Ошибка при добавлении типа курса:', error);
@@ -290,8 +286,8 @@ class AdminController {
             res.status(500).send('Произошла ошибка при обновлении типа курса');
         }
     }
-    
-    
+
+
 
     async deleteCourse(req, res) {
         try {
@@ -345,19 +341,21 @@ class AdminController {
     }
 
     async deleteVideo(req, res) {
-        const { id } = req.params;
         try {
             await isAdmin(req, res, async () => {
-                const type = await models.Videos.findByPk(id);
-                if (!type) {
+                const { id } = req.params;
+
+                const video = await models.Videos.findByPk(id);
+                if (!video) {
                     return res.status(404).send('Видео не найдено');
                 }
-                await type.destroy();
-                return res.render('./layouts/infoAdmin.hbs', { layout: "infoAdmin.hbs", message: 'Видео успешно удалено' });
+                await video.destroy();
+
+                res.status(200).send({ message: 'Видео успешно удалено' });
             });
         } catch (error) {
-            console.error('Ошибка при удалении типа:', error);
-            res.status(500).send('Произошла ошибка при удалении типа');
+            console.error('Ошибка при удалении видео:', error);
+            res.status(500).send('Произошла ошибка при удалении видео');
         }
     }
 
@@ -395,6 +393,45 @@ class AdminController {
         }
     }
 
+    async deleteVideo(req, res) {
+        const { id } = req.params;
+        try {
+            await isAdmin(req, res, async () => {
+                const video = await models.Videos.findByPk(id);
+                if (!video) {
+                    return res.status(404).send('Видео не найдено');
+                }
+                await video.destroy();
+                return res.render('./layouts/infoAdmin.hbs', { layout: "infoAdmin.hbs", message: 'Видео успешно удалено' });
+            });
+        } catch (error) {
+            console.error('Ошибка при удалении ответа:', error);
+            res.status(500).send('Произошла ошибка при удалении ответа');
+        }
+    }
+
+    //видео
+
+    async uploadVideo(req, res) {
+        try {
+            await isAdmin(req, res, async () => {
+                const { courseId } = req.body;
+                const videoData = req.file.buffer;
+                const filename = req.file.originalname;
+
+                const video = await models.Videos.create({
+                    course_id: courseId,
+                    video_content: videoData,
+                    video_description: filename
+                });
+
+                return res.render('./layouts/infoAdmin.hbs', { layout: "infoAdmin.hbs", message: 'Видео успешно добавлено' });
+            });
+        } catch (error) {
+            console.error('Ошибка при загрузке видео:', error);
+            res.status(500).send('Произошла ошибка при загрузке видео');
+        }
+    }
 
 
 }

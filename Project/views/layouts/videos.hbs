@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Video</title>
+    <style>
+        .back-button {
+            background-color: #4567b7;
+            color: #ffffff;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            text-decoration: none;
+            display: inline-block;
+            margin-right: 10px;
+        }
+
+        h1 {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #4567b7;
+            margin-bottom: 1rem;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+        }
+
+        label {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        input[type="file"],
+        select {
+            font-size: 1rem;
+            padding: 0.5rem;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+            margin-bottom: 1rem;
+        }
+
+        button[type="submit"] {
+            background-color: #4567b7;
+            color: #ffffff;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            border: none;
+            cursor: pointer;
+            margin-top: 1rem;
+        }
+
+        button[type="submit"]:hover {
+            background-color: #334ccc;
+        }
+
+        .video-container {
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body>
+    {{> adminHeader}}
+    <a href="/admin" class="back-button">Вернуться к главной панели</a>
+    <a href="/admin/courses" class="back-button">Назад</a>
+    <h1>Upload Video</h1>
+    <form action="/admin/upload-video" method="POST" enctype="multipart/form-data">
+        <label for="courseSelect">Выберите курс:</label>
+        <select id="courseSelect" name="courseId" required>
+            {{#each courses}}
+            <option value="{{this.course_id}}">{{this.course_name}}</option>
+            {{/each}}
+        </select>
+        <label for="videoUpload">Выберите видео:</label>
+        <input type="file" id="videoUpload" name="video" accept="video/*" required>
+        <button type="submit">Загрузить видео</button>
+    </form>
+
+{{#each videos}}
+<div class="video-container">
+    <video width="320" height="240" controls>
+        <source src="{{this.video_description}}" type="video/mp4">
+        Your browser does not support the video tag.
+    </video>
+    <form action="/admin/delete-video/{{this.video_id}}" method="POST">
+        <button type="submit">Удалить видео</button>
+    </form>
+</div>
+{{/each}}
+</body>
+</html>

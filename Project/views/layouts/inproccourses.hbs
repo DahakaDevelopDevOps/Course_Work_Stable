@@ -5,67 +5,60 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Курсы</title>
-    <style>
-#back-to-profile-link,
-.updatestatus-button {
-    text-decoration: none;
-    color: #fff;
-    padding: 10px;
-    background-color: #007bff;
-    border: none;
-    border-radius: 5px;
-    display: inline-block;
-    margin-bottom: 20px;
-    cursor: pointer;
-}
+  <style>
+        #back-to-profile-link,
+        .updatestatus-button {
+            text-decoration: none;
+            color: #fff;
+            padding: 10px;
+            background-color: #007bff;
+            border: none;
+            border-radius: 5px;
+            display: inline-block;
+            margin-bottom: 20px;
+            cursor: pointer;
+        }
 
-.updatestatus-button {
-    background-color: #28a745;
-}
+        .updatestatus-button {
+            background-color: #28a745;
+        }
 
-.updatestatus-button:hover {
-    background-color: #1e7e34;
-}
-.course-card {
-  border: 1px solid #007bff;
-  margin: 10px;
-  padding: 10px;
-}
+        .updatestatus-button:hover {
+            background-color: #1e7e34;
+        }
+
+        .course-card {
+            border: 1px solid #007bff;
+            margin: 10px;
+            padding: 10px;
+        }
     </style>
 </head>
 
 <body>
 
-
     <a id="back-to-profile-link" href="/profile">Назад к профилю</a>
-<div id="course-container">
-    {{#each courses}}
-    <div class="course-card">
-        <h2>{{course_name}}</h2> 
-        <p>{{description}}</p>
-        <p>Продолжительность: {{duration}}</p> 
-        <p>Дата начала: {{start_date}}</p>
-        <button class="updatestatus-button" data-course-id="{{course_id}}">Завершить</button>
+    <div id="course-container">
+        {{#if courses.length}}
+            {{#each courses}}
+                <div class="course-card">
+                    <h2>{{course_name}}</h2>
+                    <p>{{description}}</p>
+                    <p>Продолжительность: {{duration}}</p>
+                    <p>Дата начала: {{start_date}}</p>
+                    <button class="details-button" data-course-id="{{course_id}}">Подробнее</button>
+                </div>
+            {{/each}}
+        {{else}}
+            <p>Пока курсов нет.</p>
+        {{/if}}
     </div>
-    {{/each}}
-</div>
 
     <script>
-        document.querySelectorAll('.updatestatus-button').forEach(button => {
-            button.addEventListener('click', async () => {
+        document.querySelectorAll('.details-button').forEach(button => {
+            button.addEventListener('click', () => {
                 const courseId = button.dataset.courseId;
-                try {
-                    const response = await fetch(`/profile/updateStatus/${courseId}`, {
-                        method: 'POST'
-                    });
-                    if (response.ok) {
-                        window.location.reload();
-                    } else {
-                        console.error('Ошибка при удалении курса');
-                    }
-                } catch (error) {
-                    console.error('Ошибка при удалении курса:', error);
-                }
+                window.location.href = `/profile/courses/${courseId}`;
             });
         });
     </script>

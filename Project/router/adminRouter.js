@@ -1,5 +1,6 @@
 const Router = require("express");
 const adminrouter = new Router();
+const upload = require('./upload');
 const adminController = require('../controllers/adminController');
 
 adminrouter
@@ -17,9 +18,8 @@ adminrouter
     .post('/updatecourse/:id', adminController.updateCourse)
 
     //типы
-    .put('/editType/:id', adminController.editType)
+    .put('/editType/:type_id', adminController.updateType)
     .post('/addType', adminController.addType)
-
 
 
     //удаление
@@ -30,5 +30,8 @@ adminrouter
     .delete('/deleteTask/:id', adminController.deleteTask)
     .delete('/deleteAnswer/:id', adminController.deleteAnswer)
 
+    //видео
+    .post('/upload-video', upload.single('video'), adminController.uploadVideo)
+    .post('/delete-video/:id', adminController.deleteVideo);
 
 module.exports = adminrouter;

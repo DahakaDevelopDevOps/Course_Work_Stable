@@ -50,29 +50,29 @@ async addEntry(req, res) {
             status_id: 2, 
         });
 
-        // Отправляем сообщение пользователю о записи на курс
-        const transporter = nodemailer.createTransport({
-            service: 'gmail',
-            auth: {
-                user: 'typebooleanfalse@gmail.com',
-                pass: 'jkds firs ahzr ardn'
-            }
-        });
+        // // Отправляем сообщение пользователю о записи на курс
+        // const transporter = nodemailer.createTransport({
+        //     service: 'gmail',
+        //     auth: {
+        //         user: 'typebooleanfalse@gmail.com',
+        //         pass: 'jkds firs ahzr ardn'
+        //     }
+        // });
 
-        const mailOptions = {
-            from: 'courseproject@gmail.com',
-            to: email, // Используем email, указанный пользователем при записи
-            subject: 'Вы успешно записались на курс',
-            text: 'Спасибо за ваш выбор! Вы успешно записались на курс. В личном кабинете вы сможете пройти его'
-        };
+        // const mailOptions = {
+        //     from: 'courseproject@gmail.com',
+        //     to: email, // Используем email, указанный пользователем при записи
+        //     subject: 'Вы успешно записались на курс',
+        //     text: 'Спасибо за ваш выбор! Вы успешно записались на курс. В личном кабинете вы сможете пройти его'
+        // };
 
-        transporter.sendMail(mailOptions, function(error, info) {
-            if (error) {
-                console.error('Ошибка при отправке сообщения:', error);
-            } else {
-                console.log('Сообщение успешно отправлено:', info.response);
-            }
-        });
+        // transporter.sendMail(mailOptions, function(error, info) {
+        //     if (error) {
+        //         console.error('Ошибка при отправке сообщения:', error);
+        //     } else {
+        //         console.log('Сообщение успешно отправлено:', info.response);
+        //     }
+        // });
 
         res.redirect('/courses');
     } catch (error) {
