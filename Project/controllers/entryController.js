@@ -12,6 +12,16 @@ class EntryController {
                 req.session.returnUrl = req.originalUrl;
                 return res.redirect('/auth/login');
             }
+            const data = await models.Statistics.findOne({
+                where:{
+                    user_id: req.session.userId,
+                    course_id: id
+                }, raw: true
+            })
+            if(data){
+                req.session.previousUrl = req.headers.referer;
+                return res.render('./layouts/error.hbs', { layout: "error.hbs", errorMessage: 'Вы не можете записаться на курс, уже прошли' });
+            }
             if (id) {
                 const user = await models.Users.findByPk(req.session.userId, { raw: true });
                 const course = await models.Courses.findByPk(id, { include: [models.CourseTypes], raw: true });

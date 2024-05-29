@@ -1,6 +1,7 @@
 const { where } = require('sequelize');
 const { models } = require('../db/utils/db');
 const answers = require('../db/models/answers');
+const { Op } = require('sequelize');
 const { raw } = require('express');
 const base64Encode = (data) => {
     if (!data) return '';
@@ -27,7 +28,38 @@ class AdminController {
     async getAdminPage(req, res) {
         try {
             await isAdmin(req, res, async () => {
-                res.render("./layouts/admin.hbs", { layout: "admin.hbs" });
+                const tasksDetails1 = await models.Tasks.findAll({include: [
+                    {
+                        model: models.Courses,
+                        attributes: ['course_name']
+                    },
+                    {
+                        model: models.Answers
+                    }
+                ],raw:true})
+                const tasksDetails = await models.Tasks.findAll({
+                    include:[ { model: models.Answers }]
+                });
+        
+                if (!tasksDetails) {
+                    throw new Error("Tasks not found");
+                }
+    
+                const tasks = tasksDetails.map(detail => {
+                    return {
+                        test_id: detail.test_id,
+                        course_id:detail.course_id,
+                        question_text: detail.question_text,
+                        answers: detail.Answers.map(answer => ({
+                            answer_id: answer.answer_id,
+                            answer_text: answer.answer_text,
+                            is_correct: answer.is_correct
+                        }))
+                    };
+                });
+
+
+                res.render("./layouts/admin.hbs", { layout: "admin.hbs", tests: tasks});
             });
         } catch (error) {
             console.error('Ошибка при проверке роли администратора:', error);
@@ -107,8 +139,9 @@ class AdminController {
                     return res.status(404).send('Тип не найден');
                 }
                 await type.update({
-                    TypeName: typeName,
-                    Description: description
+                    type_name: type_name,
+                    description: description,
+                    other_details: other_details
                 });
                 res.send('Информация о типе успешно обновлена');
             });
@@ -217,8 +250,8 @@ class AdminController {
             await isAdmin(req, res, async () => {
                 const courseId = req.params.id;
                 const { courseName, description, details, duration, courseType } = req.body;
-                if (duration <= 0 || duration >= 1000) {
-                    return res.status(400).send('Продолжительность курса должна быть больше 0 и меньше 1000');
+                if (duration <= 0 || duration >= 100) {
+                    return res.status(400).send('Продолжительность курса должна быть больше 0 и меньше 100');
                 }
 
                 const existingCourse = await models.Courses.findOne({
@@ -256,6 +289,59 @@ class AdminController {
             console.error('Ошибка при обновлении курса:', error);
             res.status(500).send('Произошла ошибка при обновлении курса');
         }
+    }
+
+    async  createQuestion(req, res) {
+        await isAdmin(req, res, async () => {
+            try {
+                const courses = await models.Courses.findAll({raw:true}); // Получение списка всех курсов
+                res.render("./layouts/createQuestion.hbs", { layout: "createQuestion.hbs", courses: courses });
+            } catch (error) {
+                console.error('Ошибка при получении курсов:', error.message);
+                res.status(500).send('Произошла ошибка при получении курсов');
+            }
+        });
+        
+    }
+    async handleCreateQuestion(req, res) {
+        await isAdmin(req, res, async () => {
+            try {
+                const { courseId, questionText, correctAnswers, incorrectAnswers } = req.body;
+                console.log(correctAnswers)
+                console.log(incorrectAnswers)
+
+                if (!courseId || !questionText || !answers || correctAnswers.length < 1 || correctAnswers.length > 4 || incorrectAnswers.length < 1 || incorrectAnswers.length > 4) {
+                    return res.status(400).send('Неверные данные. Верных  и неверных ответов должно быть не меньше 1 и не больше 4.');
+                }
+
+    
+                const newQuestion = await models.Tasks.create({
+                    course_id: courseId,
+                    question_text: questionText
+                });
+    
+                // Создание ответов
+                for (const answer of correctAnswers) {
+                    await models.Answers.create({
+                        test_id: newQuestion.test_id,
+                        answer_text: answer,
+                        is_correct: 1 
+                    });
+                }
+                for (const answer of incorrectAnswers) {
+                    await models.Answers.create({
+                        test_id: newQuestion.test_id,
+                        answer_text: answer,
+                        is_correct: 0
+                    });
+                }
+    
+                res.redirect('/admin'); 
+            } catch (error) {
+                console.error('Ошибка при создании вопроса и ответов:', error.message);
+                res.status(500).send('Произошла ошибка при создании вопроса и ответов');
+            }
+        });
     }
 
 

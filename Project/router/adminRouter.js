@@ -10,6 +10,9 @@ adminrouter
     .get('/courses', adminController.getCourses)
     .get('/videos', adminController.getVideos)
     .get('/tasks', adminController.getTasks)
+    .get('/create/question', adminController.createQuestion)
+    .post('/create/question', adminController.handleCreateQuestion)
+
 
     // Маршруты для операций с курсами 
     .get('/editcourse/:id', adminController.editCourseView)
@@ -27,7 +30,7 @@ adminrouter
     .delete('/deletecourse/:id', adminController.deleteCourse)
     .delete('/deleteUser/:id', adminController.deleteUser)
     .delete('/deleteVideo/:id', adminController.deleteVideo)
-    .delete('/deleteTask/:id', adminController.deleteTask)
+    .delete('/delete/test/:id', adminController.deleteTask)
     .delete('/deleteAnswer/:id', adminController.deleteAnswer)
 
     //видео

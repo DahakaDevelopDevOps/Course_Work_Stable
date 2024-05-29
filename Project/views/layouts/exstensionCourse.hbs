@@ -64,7 +64,7 @@
             cursor: pointer;
         }
 
-        .task input[type="radio"] {
+        .task input[type="checkbox"] {
             margin-right: 10px;
         }
 
@@ -109,6 +109,7 @@
 </head>
 
 <body>
+        {{> header}}
     <div class="container">
         <h1>Видео курса</h1>
         {{#each videous}}
@@ -129,15 +130,15 @@
                     {{#each this.answers}}
                     <li>
                         <label>
-                            <input type="radio" name="answer{{../test_id}}" value="{{this.answer_id}}"
+                            <input type="checkbox" name="answer{{../test_id}}" value="{{this.answer_id}}"
                                 data-is-correct="{{this.is_correct}}"> {{this.answer_text}}
                         </label>
                     </li>
                     {{/each}}
                 </ul>
             </div>
-             <button type="button" id="finishButton" class="hidden" data-course-id="{{this.course_id}}">Завершить</button>
             {{/each}}
+                        <button type="button" id="finishButton" class="hidden" data-course-id="{{this.course_id}}">Завершить</button>
             <button type="submit">Отправить ответы</button>
         </form>
     </div>
@@ -147,24 +148,20 @@
             const testForm = document.getElementById('testForm');
             const finishButton = document.getElementById('finishButton');
 
-            testForm.addEventListener('submit', async function (event) {
+            testForm.addEventListener('submit', function (event) {
                 event.preventDefault();
                 let allCorrect = true;
 
                 const tasks = document.querySelectorAll('.task');
 
                 tasks.forEach(task => {
-                    const selectedAnswer = task.querySelector('input[type="radio"]:checked');
-                    if (selectedAnswer) {
-                        const isCorrect = selectedAnswer.dataset.isCorrect === 'true';
-                        if (isCorrect) {
-                            task.classList.add('correct');
-                            task.classList.remove('incorrect');
-                        } else {
-                            task.classList.add('incorrect');
-                            task.classList.remove('correct');
-                            allCorrect = false;
-                        }
+                    const selectedAnswers = task.querySelectorAll('input[type="checkbox"]:checked');
+                    const correctAnswers = task.querySelectorAll('input[type="checkbox"][data-is-correct="true"]');
+                    const selectedCorrectAnswers = Array.from(selectedAnswers).filter(answer => answer.dataset.isCorrect === 'true');
+
+                    if (selectedAnswers.length === correctAnswers.length && selectedCorrectAnswers.length === correctAnswers.length) {
+                        task.classList.add('correct');
+                        task.classList.remove('incorrect');
                     } else {
                         task.classList.add('incorrect');
                         task.classList.remove('correct');
@@ -181,7 +178,6 @@
             });
 
             finishButton.addEventListener('click', async function () {
-                console.log("sdfghjk")
                 const courseId = this.dataset.courseId;
                 if (!courseId) {
                     console.error('ID курса отсутствует');
