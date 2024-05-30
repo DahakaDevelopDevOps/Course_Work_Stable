@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Видео курса и тесты</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+            color: #343a40;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #ffffff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #007bff;
+        }
+
+        .video {
+            margin-bottom: 20px;
+        }
+
+        .video video {
+            width: 100%;
+            border-radius: 8px;
+        }
+
+        .task {
+            margin-bottom: 30px;
+            padding: 15px;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            background-color: #f1f1f1;
+        }
+
+        .task h2 {
+            font-size: 18px;
+            color: #495057;
+        }
+
+        .task ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        .task li {
+            margin: 10px 0;
+        }
+
+        .task label {
+            font-size: 16px;
+            color: #495057;
+            cursor: pointer;
+        }
+
+        .task input[type="checkbox"] {
+            margin-right: 10px;
+        }
+
+        .correct {
+            background-color: #d4edda;
+            /* Светло-зеленый цвет */
+        }
+
+        .incorrect {
+            background-color: #f8d7da;
+            /* Светло-красный цвет */
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        button {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 16px;
+            color: #ffffff;
+            background-color: #007bff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        #finishButton {
+            background-color: #28a745;
+        }
+
+        #finishButton:hover {
+            background-color: #218838;
+        }
+    </style>
+</head>
+
+<body>
+        {{> header}}
+    <div class="container">
+        <h1>Видео курса</h1>
+{{#each videous}}
+<div class="video-container">
+    <video width="320" height="240" controls>
+        <source src="{{this.video_url}}" type="video/mp4">
+        Your browser does not support the video tag.
+    </video>
+</div>
+{{/each}}
+
+        <h1>Тесты для курса</h1>
+        <form id="testForm">
+            {{#each tasks}}
+            <div class="task" data-test-id="{{this.test_id}}">
+                <h2>{{this.question_text}}</h2>
+                <ul>
+                    {{#each this.answers}}
+                    <li>
+                        <label>
+                            <input type="checkbox" name="answer{{../test_id}}" value="{{this.answer_id}}"
+                                data-is-correct="{{this.is_correct}}"> {{this.answer_text}}
+                        </label>
+                    </li>
+                    {{/each}}
+                </ul>
+            </div>
+            {{/each}}
+                        <button type="button" id="finishButton" class="hidden" data-course-id="{{this.course_id}}">Завершить</button>
+            <button type="submit">Отправить ответы</button>
+        </form>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const testForm = document.getElementById('testForm');
+            const finishButton = document.getElementById('finishButton');
+
+            testForm.addEventListener('submit', function (event) {
+                event.preventDefault();
+                let allCorrect = true;
+
+                const tasks = document.querySelectorAll('.task');
+
+                tasks.forEach(task => {
+                    const selectedAnswers = task.querySelectorAll('input[type="checkbox"]:checked');
+                    const correctAnswers = task.querySelectorAll('input[type="checkbox"][data-is-correct="true"]');
+                    const selectedCorrectAnswers = Array.from(selectedAnswers).filter(answer => answer.dataset.isCorrect === 'true');
+
+                    if (selectedAnswers.length === correctAnswers.length && selectedCorrectAnswers.length === correctAnswers.length) {
+                        task.classList.add('correct');
+                        task.classList.remove('incorrect');
+                    } else {
+                        task.classList.add('incorrect');
+                        task.classList.remove('correct');
+                        allCorrect = false;
+                    }
+                });
+
+                if (allCorrect) {
+                    finishButton.classList.remove('hidden');
+                    alert('Все ответы верны! Нажмите "Завершить" для продолжения.');
+                } else {
+                    alert('Есть неверные ответы. Пожалуйста, проверьте и исправьте ошибки.');
+                }
+            });
+
+            finishButton.addEventListener('click', async function () {
+                const courseId = this.dataset.courseId;
+                if (!courseId) {
+                    console.error('ID курса отсутствует');
+                    return;
+                }
+
+                try {
+                    const response = await fetch(`/profile/updateStatus/${courseId}`, {
+                        method: 'POST'
+                    });
+                    if (response.ok) {
+                        window.location.reload();
+                    } else {
+                        console.error('Ошибка при обновлении статуса курса');
+                    }
+                } catch (error) {
+                    console.error('Ошибка при обновлении статуса курса:', error);
+                }
+            });
+        });
+    </script>
+
+</body>
+
+</html>

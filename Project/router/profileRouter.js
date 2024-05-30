@@ -7,7 +7,9 @@ profileRouter
     .get('/', profileController.getProfile)
     .get('/finished', profileController.getFinishedCourses)
     .get('/inprocess', profileController.getInprocessCourses)
-    .post('/updateStatus/:courseId', profileController.updateCourseStatus); 
+    .get('/courses/:courseId', profileController.getCourse)
+    .post('/submitAnswers', profileController.submitAnswers)
+    .post('/updateStatus/:courseId', profileController.updateCourseStatus)
 
 
 module.exports = profileRouter;

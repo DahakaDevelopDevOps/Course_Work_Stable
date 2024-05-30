@@ -3,40 +3,149 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Курсы</title>
+    <title>Manage Course Types</title>
+    <link rel="stylesheet" href="/path/to/your/css/styles.css">
+    <script src="/path/to/your/js/scripts.js" defer></script>
     <style>
-        /* Стили для карточек курсов */
-        .types-card {
+        .card {
             border: 1px solid #ccc;
-            border-radius: 8px; /* Добавлен скругленный угол для карточек */
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Добавлен тень для эффекта поднятия */
-            padding: 20px;
-            margin: 10px;
-            background-color: #f9f9f9; /* Добавлен фоновый цвет для карточек */
+            padding: 16px;
+            margin: 16px;
+            border-radius: 8px;
+            box-shadow: 2px 2px 12px #aaa;
+        }
+
+        .card-actions {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 12px;
+        }
+
+        .edit-form {
+            display: none;
         }
     </style>
 </head>
 
 <body>
     {{> adminHeader}}
+    <br>
     {{> back}}
+    <h1>Manage Course Types</h1>
+    <h2>Add New Type</h2>
+    <form id="add-type-form" action="/admin/addType" method="post">
+        <label for="typeName">Type Name:</label>
+        <input type="text" id="typeName" name="typeName" required>
+        <label for="description">Description:</label>
+        <input type="text" id="description" name="description">
+        <label for="otherDetails">Other Details:</label>
+        <input type="text" id="otherDetails" name="otherDetails">
+        <button type="submit">Add Type</button>
+    </form>
 
-    <div id="course-container">
+    <div id="course-types-container">
         {{#each types}}
-        <div class="types-card">
-            <h2>{{type_name}}</h2>
-            <p>ID: {{this.type_id}}</p>
-            <p>Описание: {{this.description}}</p>
-            <p>Детали описание: {{this.other_details}}</p>
+        <div class="card" id="card-{{this.type_id}}">
+            <h2>{{this.type_name}}</h2>
+            <p>{{this.description}}</p>
+            <p>{{this.other_details}}</p>
+            <div class="card-actions">
+                <button onclick="showEditForm({{this.type_id}})">Edit</button>
+                <button class="delete-button" data-type-id="{{this.type_id}}">Удалить</button>
+            </div>
+            <div class="edit-form" id="edit-form-{{this.type_id}}">
+                <form onsubmit="updateType(event, {{this.type_id}})">
+                    <label for="edit-type-name-{{this.type_id}}">Type Name:</label>
+                    <input type="text" id="edit-type-name-{{this.type_id}}" name="type_name" value="{{this.type_name}}"
+                        required>
+                    <label for="edit-description-{{this.type_id}}">Description:</label>
+                    <input type="text" id="edit-description-{{this.type_id}}" name="description"
+                        value="{{this.description}}">
+                    <label for="edit-other-details-{{this.type_id}}">Other Details:</label>
+                    <input type="text" id="edit-other-details-{{this.type_id}}" name="other_details"
+                        value="{{this.other_details}}">
+                    <button type="submit">Update</button>
+                    <button type="button" onclick="hideEditForm({{this.type_id}})">Cancel</button>
+                </form>
+            </div>
+
         </div>
         {{/each}}
     </div>
 
     <script>
+       document.addEventListener('DOMContentLoaded', () => {
+    async function updateType(event, typeId) {
+        event.preventDefault();
+
+        const typeName = document.getElementById(`edit-type-name-${typeId}`).value;
+        const description = document.getElementById(`edit-description-${typeId}`).value;
+        const otherDetails = document.getElementById(`edit-other-details-${typeId}`).value;
+
+        console.log('Updating type with data:', { type_name: typeName, description, other_details: otherDetails });
+
+        try {
+            const response = await fetch(`/admin/editType/${typeId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ type_name: typeName, description: description, other_details: otherDetails })
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to update type');1
+            }
+
+            alert('Type updated successfully');
+            location.reload();
+        } catch (error) {
+            console.error('Error updating type:', error);
+            alert('Error updating type');
+        }
+    }
+
+    document.querySelectorAll('.edit-form form').forEach(form => {
+        form.addEventListener('submit', event => {
+            const typeId = form.closest('.card').getAttribute('id').split('-')[1];
+            updateType(event, typeId);
+        });
+    });
+});
+
+
+            document.querySelectorAll('.delete-button').forEach(button => {
+                button.addEventListener('click', async () => {
+
+                    const typeId = button.dataset.typeId;
+                    try {
+                        if (confirm('Вы уверены, что хотите удалить этот тип?')) {
+                            const response = await fetch(`/admin/deleteType/${typeId}`, {
+                                method: 'DELETE'
+                            });
+                            if (response.ok) {
+                                window.location.reload();
+                            } else {
+                                console.error('Ошибка при удалении типа');
+                            }
+                        }
+                    } catch (error) {
+                        console.error('Ошибка при удалении типа:', error);
+                    }
+                });
+            });
+
+
+            window.showEditForm = (typeId) => {
+                document.getElementById(`edit-form-${typeId}`).style.display = 'block';
+            };
+
+            window.hideEditForm = (typeId) => {
+                document.getElementById(`edit-form-${typeId}`).style.display = 'none';
+            };
+        });
 
     </script>
-
 </body>
 
 </html>

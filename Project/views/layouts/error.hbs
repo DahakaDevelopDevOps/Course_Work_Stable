@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Error</title>
+    <style>
+
+    </style>
+</head>
+<body>
+    <div class="error-container">
+        <h1>ОШИБКА!</h1>
+        <p>{{errorMessage}}</p>
+        <a href="#" class="go-back-link" onclick="goBackToPage()">Назад</a>
+    </div>
+
+    <script>
+        function goBackToPage() {
+            var previousUrl = sessionStorage.getItem('previousUrl');
+            if (previousUrl) {
+                window.location.href = previousUrl;
+            } else {
+                window.history.back();
+            }
+        }
+    </script>
+</body>
+</html>
+

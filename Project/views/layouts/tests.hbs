@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Manage Tests</title>
+    <link rel="stylesheet" href="/path/to/your/css/styles.css">
+</head>
+
+<body>
+    {{> adminHeader}}
+    <br>
+    {{> back}}
+    <h1>Manage Tests</h1>
+    <select id="course-filter">
+        <option value="all">All Courses</option>
+        {{#each courses}}
+        <option value="{{this.id}}">{{this.course_name}}</option>
+        {{/each}}
+    </select>
+
+    <!-- Форма добавления нового теста -->
+    <h2>Add New Test</h2>
+    <form id="add-test-form" onsubmit="addTest(event)">
+        <label for="test-name">Test Name:</label>
+        <input type="text" id="test-name" required>
+        <label for="course-id">Course:</label>
+        <select id="course-id" required>
+            {{#each courses}}
+            <option value="{{this.id}}">{{this.course_name}}</option>
+            {{/each}}
+        </select>
+        <h3>Questions:</h3>
+        <div id="questions-container">
+            <!-- Контейнер для вопросов -->
+        </div>
+        <!-- Кнопка для добавления нового вопроса -->
+        <button type="button" onclick="addQuestion()">Add Question</button>
+        <button type="submit">Add Test</button>
+    </form>
+
+    <!-- Список всех тестов -->
+    <h2>All Tests</h2>
+    <div id="tests-container">
+        {{#each tests}}
+        <div class="test-card" id="test-{{this.id}}">
+            <h3>{{this.test_name}}</h3>
+            <p>Course: {{this.Course.course_name}}</p>
+            <!-- Кнопки для редактирования и удаления теста -->
+            <button onclick="editTest({{this.id}})">Edit</button>
+            <button onclick="deleteTest({{this.id}})">Delete</button>
+        </div>
+        {{/each}}
+    </div>
+
+    <script>
+        async function deleteTest(testId) {
+            if (!confirm('Are you sure you want to delete this test?')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/tests/${testId}`, {
+                    method: 'DELETE'
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to delete test');
+                }
+
+                alert('Test deleted successfully');
+                document.getElementById(`test-${testId}`).remove(); // Удалить карточку теста из DOM
+            } catch (error) {
+                console.error('Error deleting test:', error);
+                alert('Error deleting test');
+            }
+        }
+
+        function filterTestsByCourse(courseId) {
+            const testCards = document.querySelectorAll('.test-card');
+            testCards.forEach(card => {
+                const courseIdAttr = card.dataset.courseId;
+                if (courseIdAttr === courseId || courseId === 'all') {
+                    card.style.display = 'block'; // Показываем карточку теста
+                } else {
+                    card.style.display = 'none'; // Скрываем карточку теста
+                }
+            });
+        }
+
+        function sortTestsByCourse() {
+            const testsContainer = document.getElementById('tests-container');
+            const testCards = testsContainer.querySelectorAll('.test-card');
+            const sortedTestCards = Array.from(testCards).sort((a, b) => {
+                const courseNameA = a.querySelector('p').textContent.split(': ')[1];
+                const courseNameB = b.querySelector('p').textContent.split(': ')[1];
+                return courseNameA.localeCompare(courseNameB);
+            });
+            testsContainer.innerHTML = ''; // Очищаем контейнер
+            sortedTestCards.forEach(card => {
+                testsContainer.appendChild(card); // Добавляем отсортированные карточки тестов обратно в контейнер
+            });
+        }
+
+        // Обработчик события изменения выбранного курса
+        document.getElementById('course-filter').addEventListener('change', function () {
+            const selectedCourseId = this.value;
+            filterTestsByCourse(selectedCourseId);
+        });
+
+        // Обработчик события изменения выбранного типа сортировки
+        document.getElementById('sort-select').addEventListener('change', function () {
+            const selectedSortType = this.value;
+            if (selectedSortType === 'course') {
+                sortTestsByCourse();
+            }
+            // Добавьте другие варианты сортировки, если необходимо
+        });
+
+        let questionCount = 0;
+
+        function addQuestion() {
+            questionCount++;
+
+            const questionContainer = document.getElementById('questions-container');
+
+            const questionDiv = document.createElement('div');
+            questionDiv.classList.add('question');
+
+            const questionLabel = document.createElement('label');
+            questionLabel.textContent = `Question ${questionCount}:`;
+            const questionInput = document.createElement('input');
+            questionInput.type = 'text';
+            questionInput.name = `question-${questionCount}`;
+            questionInput.required = true;
+
+            const answerLabel = document.createElement('label');
+            answerLabel.textContent = 'Answers:';
+            const answerInput = document.createElement('input');
+            answerInput.type = 'text';
+            answerInput.name = `answer-${questionCount}-1`;
+            answerInput.required = true;
+
+            const correctLabel = document.createElement('label');
+            correctLabel.textContent = 'Correct:';
+            const correctInput = document.createElement('input');
+            correctInput.type = 'checkbox';
+            correctInput.name = `correct-${questionCount}-1`;
+
+            questionDiv.appendChild(questionLabel);
+            questionDiv.appendChild(questionInput);
+
+            const answerDiv = document.createElement('div');
+            answerDiv.classList.add('answers');
+            answerDiv.appendChild(answerLabel);
+            answerDiv.appendChild(answerInput);
+            answerDiv.appendChild(correctLabel);
+            answerDiv.appendChild(correctInput);
+
+            questionDiv.appendChild(answerDiv);
+
+            questionContainer.appendChild(questionDiv);
+        }
+
+        function addTest(event) {
+            event.preventDefault();
+
+            const testName = document.getElementById('test-name').value;
+            const courseId = document.getElementById('course-id').value;
+
+            const questions = [];
+
+            const questionInputs = document.querySelectorAll('.question');
+            questionInputs.forEach(questionInput => {
+                const questionText = questionInput.querySelector('input[type="text"]').value;
+                const answers = [];
+                const answerInputs = questionInput.querySelectorAll('.answers');
+                answerInputs.forEach(answerInput => {
+                    const answerText = answerInput.querySelector('input[type="text"]').value;
+                    const isCorrect = answerInput.querySelector('input[type="checkbox"]').checked;
+                    answers.push({ answer: answerText, correct: isCorrect });
+                });
+                questions.push({ question: questionText, answers: answers });
+            });
+
+            const data = {
+                test_name: testName,
+                course_id: courseId,
+                questions: questions
+            };
+
+            console.log(data); // Отправка данных на сервер или выполнение других действий
+        }
+    </script>
+</body>
+
+</html>
+

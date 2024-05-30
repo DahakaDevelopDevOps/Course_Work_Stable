@@ -4,21 +4,108 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Курсы</title>
+    <title>Список тестов</title>
     <style>
-        /* Стили для карточек курсов */
-        .course-card {
-            border: 1px solid #ccc;
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+            color: #343a40;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #ffffff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #007bff;
+        }
+
+        .test {
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
             padding: 10px;
-            margin: 10px;
+            margin-bottom: 20px;
+        }
+
+        .test-header {
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .question {
+            margin-bottom: 10px;
+        }
+
+        .answer {
+            margin-left: 20px;
+        }
+
+        button {
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #c82333;
         }
     </style>
 </head>
 
 <body>
-    {{> adminHeader}}
+        {{> adminHeader}}
+    <div class="container">
+        <h1>Список тестов</h1>
+        {{#each tests}}
+        <div class="test">
+            <div class="test-header">
+                <h2>Тест ID: {{this.test_id}}</h2>
+                <p>Курс: {{this.course_id}}</p>
+                <p>Вопрос: {{this.question_text}}</p>
+            </div>
+            <ul>
+                {{#each this.answers}}
+                <li class="answer">
+                    Ответ ID: {{this.answer_id}} - {{this.answer_text}} ({{#if this.is_correct}}верный{{else}}неверный{{/if}})
+                </li>
+                {{/each}}
+            </ul>
+            <button onclick="deleteTest('{{this.test_id}}')">Удалить</button>
+        </div>
+        {{/each}}
+    </div>
 
-
+    <script>
+        function deleteTest(testId) {
+            if (confirm("Вы уверены, что хотите удалить этот тест?")) {
+                fetch(`/admin/delete/test/${testId}`, {
+                        method: 'DELETE'
+                    })
+                    .then(response => {
+                        if (response.ok) {
+                            location.reload(); // Перезагрузить страницу после успешного удаления
+                        } else {
+                            alert('Произошла ошибка при удалении теста.');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Ошибка при удалении теста:', error);
+                        alert('Произошла ошибка при удалении теста.');
+                    });
+            }
+        }
+    </script>
 </body>
 
 </html>

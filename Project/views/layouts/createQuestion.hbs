@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Создание вопроса</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+            color: #343a40;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #ffffff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #007bff;
+        }
+
+        label {
+            display: block;
+            margin: 10px 0 5px;
+        }
+
+        input[type="text"],
+        select {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+        }
+
+        button {
+            display: inline-block;
+            padding: 10px 20px;
+            font-size: 16px;
+            color: #ffffff;
+            background-color: #007bff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        .answer-group {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .answer-group input[type="text"] {
+            flex: 1;
+            margin-right: 10px;
+        }
+
+        .answer-group button {
+            background-color: #dc3545;
+        }
+
+        .answer-group button:hover {
+            background-color: #c82333;
+        }
+    </style>
+</head>
+
+<body>
+    {{> adminHeader}}
+    <div class="container">
+        <h1>Создание вопроса</h1>
+        <form id="createQuestionForm" action="/admin/create/question" method="POST">
+            <label for="course">Выберите курс:</label>
+            <select id="course" name="courseId">
+                {{#each courses}}
+                <option value="{{this.course_id}}">{{this.course_name}}</option>
+                {{/each}}
+            </select>
+
+            <label for="questionText">Вопрос:</label>
+            <input type="text" id="questionText" name="questionText" required>
+
+            <div id="correctAnswersContainer">
+                <label for="correctAnswer">Верные ответы:</label>
+                <div class="answer-group">
+                    <input type="text" name="correctAnswers" placeholder="Верный ответ" required>
+                    <button type="button" onclick="removeAnswer(this)">Удалить</button>
+                </div>
+            </div>
+
+            <div id="incorrectAnswersContainer">
+                <label for="incorrectAnswer">Неверные ответы:</label>
+                <div class="answer-group">
+                    <input type="text" name="incorrectAnswers" placeholder="Неверный ответ" required>
+                    <button type="button" onclick="removeAnswer(this)">Удалить</button>
+                </div>
+            </div>
+
+            <button type="button" onclick="addAnswer('correctAnswersContainer')">Добавить верный ответ</button>
+            <button type="button" onclick="addAnswer('incorrectAnswersContainer')">Добавить неверный ответ</button>
+            <button type="submit">Сохранить</button>
+        </form>
+    </div>
+
+    <script>
+        function addAnswer(containerId) {
+            const container = document.getElementById(containerId);
+            const answerGroupCount = container.querySelectorAll('.answer-group').length;
+            const isCorrect = containerId === 'correctAnswersContainer';
+            
+            if ((isCorrect && answerGroupCount >= 4) || (!isCorrect && answerGroupCount >= 4)) {
+                alert('Можно добавить не более 4 верных и 4 неверных ответов.');
+                return;
+            }
+            
+            const newAnswerGroup = document.createElement('div');
+            newAnswerGroup.className = 'answer-group';
+            newAnswerGroup.innerHTML = `
+                <input type="text" name="${isCorrect ? 'correctAnswers' : 'incorrectAnswers'}" placeholder="${isCorrect ? 'Верный ответ' : 'Неверный ответ'}" required>
+                <button type="button" onclick="removeAnswer(this)">Удалить</button>
+            `;
+                container.appendChild(newAnswerGroup);
+        }
+
+        function removeAnswer(button) {
+            const answerGroup = button.parentNode;
+            answerGroup.parentNode.removeChild(answerGroup);
+        }
+
+        document.getElementById('createQuestionForm').addEventListener('submit', function (event) {
+            const correctAnswerCount = document.querySelectorAll('#correctAnswersContainer .answer-group').length;
+            const incorrectAnswerCount = document.querySelectorAll('#incorrectAnswersContainer .answer-group').length;
+
+            if (correctAnswerCount === 0) {
+                alert('Необходимо добавить хотя бы один верный ответ.');
+                event.preventDefault();
+                return;
+            }
+
+            if (correctAnswerCount > 4) {
+                alert('Можно добавить не более 4 верных ответов.');
+                event.preventDefault();
+                return;
+            }
+
+            if (incorrectAnswerCount > 4) {
+                alert('Можно добавить не более 4 неверных ответов.');
+                event.preventDefault();
+                return;
+            }
+        });
+    </script>
+</body>
+
+</html>
+

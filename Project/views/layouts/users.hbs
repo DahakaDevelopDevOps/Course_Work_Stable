@@ -8,21 +8,34 @@
     <style>
         /* Стили для карточек пользователей */
         .user-card {
-            background-color: #f9f9f9; /* Цвет фона */
-            border: 1px solid #ddd; /* Граница */
-            border-radius: 8px; /* Скругленные углы */
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Тень */
-            padding: 20px; /* Отступ внутри карточки */
-            margin: 10px; /* Внешний отступ */
-            max-width: 400px; /* Максимальная ширина */
-            overflow: hidden; /* Предотвращение переполнения содержимого */
+            background-color: #f9f9f9;
+            /* Цвет фона */
+            border: 1px solid #ddd;
+            /* Граница */
+            border-radius: 8px;
+            /* Скругленные углы */
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            /* Тень */
+            padding: 20px;
+            /* Отступ внутри карточки */
+            margin: 10px;
+            /* Внешний отступ */
+            max-width: 400px;
+            /* Максимальная ширина */
+            overflow: hidden;
+            /* Предотвращение переполнения содержимого */
         }
+
         .user-card h2 {
-            margin-top: 0; /* Убираем верхний отступ у заголовка */
-            margin-bottom: 10px; /* Отступ между заголовком и остальным содержимым */
+            margin-top: 0;
+            /* Убираем верхний отступ у заголовка */
+            margin-bottom: 10px;
+            /* Отступ между заголовком и остальным содержимым */
         }
+
         .user-card p {
-            margin: 5px 0; /* Отступы для параграфов */
+            margin: 5px 0;
+            /* Отступы для параграфов */
         }
     </style>
 </head>
@@ -31,18 +44,41 @@
     {{> adminHeader}}
     {{> back}}
     <div id="course-container">
-        
+
         {{#each users}}
         <div class="user-card">
             <h2>{{this.Login}}</h2>
             <p>ID: {{this.ID}}</p>
             <p>Email: {{this.Email}}</p>
+                    <div class="button-container">
+            <button class="delete-button" data-user-id="{{this.ID}}">Удалить</button>
+
+        </div> 
         </div>
         {{/each}}
     </div>
 
     <script>
+        document.querySelectorAll('.delete-button').forEach(button => {
+            button.addEventListener('click', async () => {
 
+                const userId = button.dataset.userId;
+                try {
+                    if (confirm('Вы уверены, что хотите удалить этого пользоватя?')) {
+                        const response = await fetch(`/admin/deleteUser/${userId}`, {
+                            method: 'DELETE'
+                        });
+                        if (response.ok) {
+                            window.location.reload();
+                        } else {
+                            console.error('Ошибка при удалении пользователя');
+                        }
+                    }
+                } catch (error) {
+                    console.error('Ошибка при удалении пользователя:', error);
+                }
+            });
+        });
     </script>
 
 </body>

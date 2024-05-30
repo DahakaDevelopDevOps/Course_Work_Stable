@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Edit Course</title>
+    <title>Upload Video</title>
     <style>
         .back-button {
             background-color: #4567b7;
@@ -34,9 +34,7 @@
             margin-bottom: 0.5rem;
         }
 
-        input[type="text"],
-        input[type="date"],
-        textarea,
+        input[type="file"],
         select {
             font-size: 1rem;
             padding: 0.5rem;
@@ -58,46 +56,39 @@
         button[type="submit"]:hover {
             background-color: #334ccc;
         }
+
+        .video-container {
+            margin-bottom: 1rem;
+        }
     </style>
 </head>
 <body>
     {{> adminHeader}}
     <a href="/admin" class="back-button">Вернуться к главной панели</a>
     <a href="/admin/courses" class="back-button">Назад</a>
-    <h1>Edit Course</h1>
-    <form action="/admin/updatecourse/{{course.course_id}}" method="POST">
-        <label for="courseName">Название курса:</label>
-        <input type="text" id="courseName" name="courseName" value="{{course.course_name}}">
-        <br>
-        <label for="description">Описание:</label>
-        <textarea id="description" name="description">{{course.description}}</textarea>
-        <br>
-        <label for="details">Навыки:</label>
-        <textarea id="details" name="details">{{course.other_details}}</textarea>
-        <br>
-        <label for="duration">Продолжительность в часах:</label>
-        <input type="text" id="duration" name="duration" value="{{course.duration}}">
-        <br>
-
-        <select id="courseType" name="courseType">
-            <option value="{{course.course_type_id}}">{{type.type_name}}</option>
-            {{#each types}}
-            <option value="{{this.type_id}}">{{this.type_name}}</option>
+    <h1>Upload Video</h1>
+    <form action="/admin/upload-video" method="POST" enctype="multipart/form-data">
+        <label for="courseSelect">Выберите курс:</label>
+        <select id="courseSelect" name="courseId" required>
+            {{#each courses}}
+            <option value="{{this.course_id}}">{{this.course_name}}</option>
             {{/each}}
         </select>
-
-
-        <button type="submit">Изменить</button>
+        <label for="videoUpload">Выберите видео:</label>
+        <input type="file" id="videoUpload" name="video" accept="video/*" required>
+        <button type="submit">Загрузить видео</button>
     </form>
 
-    <script>
-        function formatDate(timeString) {
-            const date = new Date(timeString);
-            const hours = String(date.getHours()).padStart(2, '0');
-            const minutes = String(date.getMinutes()).padStart(2, '0');
-            const seconds = String(date.getSeconds()).padStart(2, '0');
-            return `${hours}:${minutes}:${seconds}`;
-        }
-    </script>
+{{#each videos}}
+<div class="video-container">
+    <video width="320" height="240" controls>
+        <source src="{{this.video_url}}" type="video/mp4">
+        Your browser does not support the video tag.
+    </video>
+    <form action="/admin/delete-video/{{this.video_id}}" method="POST">
+        <button type="submit">Удалить видео</button>
+    </form>
+</div>
+{{/each}}
 </body>
 </html>

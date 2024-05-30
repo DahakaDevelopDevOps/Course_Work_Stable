@@ -12,6 +12,16 @@ class EntryController {
                 req.session.returnUrl = req.originalUrl;
                 return res.redirect('/auth/login');
             }
+            const data = await models.Statistics.findOne({
+                where:{
+                    user_id: req.session.userId,
+                    course_id: id
+                }, raw: true
+            })
+            if(data){
+                req.session.previousUrl = req.headers.referer;
+                return res.render('./layouts/error.hbs', { layout: "error.hbs", errorMessage: 'Вы не можете записаться на курс, уже прошли' });
+            }
             if (id) {
                 const user = await models.Users.findByPk(req.session.userId, { raw: true });
                 const course = await models.Courses.findByPk(id, { include: [models.CourseTypes], raw: true });
@@ -74,44 +84,14 @@ async addEntry(req, res) {
             }
         });
 
-        res.redirect('/courses');
+        res.render('./layouts/info.hbs', {layout: "info.hbs", message: 'Спасибо что записались на мастер-класс' });
+           
+        // res.redirect('/courses');
     } catch (error) {
         console.error('Ошибка при записи на курс:', error);
         res.status(500).send('Произошла ошибка при записи на курс');
     }
 }
-
-
-    // async addEntry(req, res) {
-    //     try {
-    //         const courseId = req.params.id;
-    //         const { email } = req.body; 
-    
-    //         const existingEntry = await models.Statistics.findOne({
-    //             where: {
-    //                 user_id: req.session.userId,
-    //                 course_id: courseId
-    //             }
-    //         });
-    //         if (existingEntry) {
-    //             res.status(400).send('Вы уже записаны на этот курс');
-    //         }
-    
-    //         const newEntry = await models.Statistics.create({
-    //             user_id: req.session.userId, 
-    //             course_id: courseId,
-    //             start_date: new Date(), 
-    //             status_id: 2, 
-    //         });
-    
-    //         res.redirect('/courses');
-    //     } catch (error) {
-    //         // В случае ошибки возвращаем статус 500 и сообщение об ошибке
-    //         console.error('Ошибка при записи на курс:', error);
-    //         res.status(500).send('Произошла ошибка при записи на курс');
-    //     }
-    // }
-    
 
 }
 

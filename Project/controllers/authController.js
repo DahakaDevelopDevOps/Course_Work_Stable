@@ -70,7 +70,7 @@ async register(req, res) {
             Login: username,
             Email: email,
             Password: hashedPassword,
-            Role: 0,
+            Role: 0
         });
         req.session.returnUrl = '/auth/login'; // Сохраняем URL входа в сессии
         res.redirect('/auth/login');
