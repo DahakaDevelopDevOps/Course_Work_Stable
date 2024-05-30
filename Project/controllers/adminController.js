@@ -16,10 +16,12 @@ async function isAdmin(req, res, next) {
         if (user && user.Role === 1) {
             next(); // Продолжаем выполнение следующего middleware'а или обработчика маршрута
         } else {
-            res.status(403).send('Ты не админ!!!'); // Возвращаем статус 403 (Запрещено) в случае отсутствия доступа
+            req.session.previousUrl = req.headers.referer;
+            return res.render('./layouts/error.hbs', { layout: "error.hbs", errorMessage: 'Ты не админ!!!' });
         }
     } else {
-        res.status(403).send('Не зарегистрирован'); // Возвращаем статус 403 (Запрещено), если пользователь не авторизован
+        req.session.previousUrl = req.headers.referer;
+        return res.render('./layouts/error.hbs', { layout: "error.hbs", errorMessage: 'Не зарегистрирован' });
     }
 }
 
@@ -28,27 +30,31 @@ class AdminController {
     async getAdminPage(req, res) {
         try {
             await isAdmin(req, res, async () => {
-                const tasksDetails1 = await models.Tasks.findAll({include: [
-                    {
-                        model: models.Courses,
-                        attributes: ['course_name']
-                    },
-                    {
-                        model: models.Answers
-                    }
-                ],raw:true})
+                const tasksDetails1 = await models.Tasks.findAll({
+                    include: [
+                        {
+                            model: models.Courses,
+                            attributes: ['course_name']
+                        },
+                        {
+                            model: models.Answers
+                        }
+                    ], raw: true
+                })
                 const tasksDetails = await models.Tasks.findAll({
-                    include:[ { model: models.Answers }]
+                    include: [{ model: models.Answers }]
                 });
-        
+
                 if (!tasksDetails) {
-                    throw new Error("Tasks not found");
+                    req.session.previousUrl = req.headers.referer;
+                    return res.render('./layouts/error.hbs', { layout: "error.hbs", errorMessage: 'нет теста' });
+
                 }
-    
+
                 const tasks = tasksDetails.map(detail => {
                     return {
                         test_id: detail.test_id,
-                        course_id:detail.course_id,
+                        course_id: detail.course_id,
                         question_text: detail.question_text,
                         answers: detail.Answers.map(answer => ({
                             answer_id: answer.answer_id,
@@ -59,7 +65,7 @@ class AdminController {
                 });
 
 
-                res.render("./layouts/admin.hbs", { layout: "admin.hbs", tests: tasks});
+                res.render("./layouts/admin.hbs", { layout: "admin.hbs", tests: tasks });
             });
         } catch (error) {
             console.error('Ошибка при проверке роли администратора:', error);
@@ -107,7 +113,15 @@ class AdminController {
             await isAdmin(req, res, async () => {
                 const courses = await models.Courses.findAll({ include: [models.CourseTypes], raw: true });
                 const videos = await models.Videos.findAll({ include: [models.Courses], raw: true })
-                res.render("./layouts/videos.hbs", { layout: "videos.hbs", videos: videos, courses: courses });
+                // Преобразуем видео BLOB в base64
+                const videosWithUrls = videos.map(video => {
+                    const base64Video = video.video_content.toString('base64');
+                    return {
+                        ...video,
+                        video_url: `data:video/mp4;base64,${base64Video}`
+                    };
+                });
+                res.render("./layouts/videos.hbs", { layout: "videos.hbs", videos: videosWithUrls, courses: courses });
             });
         } catch (error) {
             console.error('Ошибка при получении записей на курсы:', error);
@@ -118,9 +132,6 @@ class AdminController {
         try {
             await isAdmin(req, res, async () => {
                 const courses = await models.Courses.findAll({ include: [models.CourseTypes], raw: true });
-                //     const tests = await models.Test.findAll({raw: true })
-                //    // const answers = await models.Answers.findAll({ include: [models.Questions],raw: true })
-                //     const questions = await models.Questions.findAll({ include: [models.Answers], raw: true })
                 res.render("./layouts/tests.hbs", { layout: "tests.hbs", courses: courses });
             });
         } catch (error) {
@@ -136,7 +147,8 @@ class AdminController {
                 const { type_name, description, other_details } = req.body;
                 const type = await models.types.findByPk(id);
                 if (!type) {
-                    return res.status(404).send('Тип не найден');
+                    req.session.previousUrl = req.headers.referer;
+                    return res.render('./layouts/error.hbs', { layout: "error.hbs", errorMessage: 'Тип не найден' });
                 }
                 await type.update({
                     type_name: type_name,
@@ -157,7 +169,8 @@ class AdminController {
                 const { id } = req.params;
                 const type = await models.types.findByPk(id);
                 if (!type) {
-                    return res.status(404).send('Тип не найден');
+                    req.session.previousUrl = req.headers.referer;
+                    return res.render('./layouts/error.hbs', { layout: "error.hbs", errorMessage: 'Тип не найден' });
                 }
                 await type.destroy();
                 res.send('Тип успешно удален');
@@ -186,11 +199,15 @@ class AdminController {
                 const { courseName, description, details, duration, courseType } = req.body;
 
                 if (isNaN(duration)) {
-                    return res.status(400).send('Продолжительность должна быть числом');
+                    req.session.previousUrl = req.headers.referer;
+                    return res.render('./layouts/error.hbs', { layout: "error.hbs", errorMessage: 'Продолжительность должна быть числом' });
                 }
                 const courseTypeExists = await models.CourseTypes.findByPk(courseType);
                 if (!courseTypeExists) {
-                    return res.status(404).send('Указанный тип курса не существует');
+                    ;
+                    req.session.previousUrl = req.headers.referer;
+                    return res.render('./layouts/error.hbs', { layout: "error.hbs", errorMessage: 'Указанный тип курса не существует' });
+
                 }
                 await models.Courses.create({
                     course_name: courseName,
@@ -208,14 +225,15 @@ class AdminController {
         }
     }
 
-    
+
     async editCourseView(req, res) {
         try {
             await isAdmin(req, res, async () => {
                 const courseId = req.params.id;
                 const course = await models.Courses.findByPk(courseId, { include: [models.CourseTypes], raw: true });
                 if (!course) {
-                    return res.status(404).send('Курс не найден');
+                    req.session.previousUrl = req.headers.referer;
+                    return res.render('./layouts/error.hbs', { layout: "error.hbs", errorMessage: 'Курс не найден' });
                 }
                 const typeId = course.course_type_id;
                 const type = await models.CourseTypes.findByPk(typeId, { raw: true });
@@ -224,18 +242,13 @@ class AdminController {
                     where: { course_id: courseId },
                     raw: true
                 });
-    
-                // Кодирование данных видео в base64
-                const encodedVideos = videos.map(video => ({
-                    ...video,
-                    base64Data: base64Encode(video.video_content) // Закодированные данные видео
-                }));
+
                 res.render("./layouts/editcourse.hbs", {
                     layout: "editcourse.hbs",
                     course: course,
                     type: type,
                     types: types,
-                    videos: encodedVideos
+                    videos: videos
                 });
             });
         } catch (error) {
@@ -243,7 +256,7 @@ class AdminController {
             res.status(500).send('Произошла ошибка при обновлении класса');
         }
     }
-    
+
 
     async updateCourse(req, res) {
         try {
@@ -251,7 +264,8 @@ class AdminController {
                 const courseId = req.params.id;
                 const { courseName, description, details, duration, courseType } = req.body;
                 if (duration <= 0 || duration >= 100) {
-                    return res.status(400).send('Продолжительность курса должна быть больше 0 и меньше 100');
+                    req.session.previousUrl = req.headers.referer;
+                    return res.render('./layouts/error.hbs', { layout: "error.hbs", errorMessage: 'Продолжительность курса должна быть больше 0 и меньше 100' });
                 }
 
                 const existingCourse = await models.Courses.findOne({
@@ -262,7 +276,8 @@ class AdminController {
                 });
 
                 if (existingCourse) {
-                    return res.status(400).send('Курс с таким именем уже существует');
+                    req.session.previousUrl = req.headers.referer;
+                    return res.render('./layouts/error.hbs', { layout: "error.hbs", errorMessage: 'Курс с таким именем уже существует' });
                 }
 
                 const updatedCourse = await models.Courses.update(
@@ -279,7 +294,8 @@ class AdminController {
                 );
 
                 if (updatedCourse[0] === 0) {
-                    return res.status(404).send('Курс не найден');
+                    req.session.previousUrl = req.headers.referer;
+                    return res.render('./layouts/error.hbs', { layout: "error.hbs", errorMessage: 'Курс не найден' });
                 }
 
                 res.redirect('/admin/courses');
@@ -291,17 +307,17 @@ class AdminController {
         }
     }
 
-    async  createQuestion(req, res) {
+    async createQuestion(req, res) {
         await isAdmin(req, res, async () => {
             try {
-                const courses = await models.Courses.findAll({raw:true}); // Получение списка всех курсов
+                const courses = await models.Courses.findAll({ raw: true }); // Получение списка всех курсов
                 res.render("./layouts/createQuestion.hbs", { layout: "createQuestion.hbs", courses: courses });
             } catch (error) {
                 console.error('Ошибка при получении курсов:', error.message);
                 res.status(500).send('Произошла ошибка при получении курсов');
             }
         });
-        
+
     }
     async handleCreateQuestion(req, res) {
         await isAdmin(req, res, async () => {
@@ -311,21 +327,22 @@ class AdminController {
                 console.log(incorrectAnswers)
 
                 if (!courseId || !questionText || !answers || correctAnswers.length < 1 || correctAnswers.length > 4 || incorrectAnswers.length < 1 || incorrectAnswers.length > 4) {
-                    return res.status(400).send('Неверные данные. Верных  и неверных ответов должно быть не меньше 1 и не больше 4.');
+                    req.session.previousUrl = req.headers.referer;
+                    return res.render('./layouts/error.hbs', { layout: "error.hbs", errorMessage: 'Неверные данные. Верных  и неверных ответов должно быть не меньше 1 и не больше 4.' });
                 }
 
-    
+
                 const newQuestion = await models.Tasks.create({
                     course_id: courseId,
                     question_text: questionText
                 });
-    
+
                 // Создание ответов
                 for (const answer of correctAnswers) {
                     await models.Answers.create({
                         test_id: newQuestion.test_id,
                         answer_text: answer,
-                        is_correct: 1 
+                        is_correct: 1
                     });
                 }
                 for (const answer of incorrectAnswers) {
@@ -335,8 +352,8 @@ class AdminController {
                         is_correct: 0
                     });
                 }
-    
-                res.redirect('/admin'); 
+
+                res.redirect('/admin');
             } catch (error) {
                 console.error('Ошибка при создании вопроса и ответов:', error.message);
                 res.status(500).send('Произошла ошибка при создании вопроса и ответов');
@@ -365,7 +382,7 @@ class AdminController {
                 const { type_id } = req.params;
                 const { type_name, description, other_details } = req.body;
                 await models.CourseTypes.update({ type_name, description, other_details }, { where: { type_id } });
-                res.status(200).send('Type updated successfully');
+                return res.render('./layouts/infoAdmin.hbs', { layout: "infoAdmin.hbs", message: 'Тип успешно удален' });
             });
         } catch (error) {
             console.error('Ошибка при обновлении типа курса:', error);
@@ -381,10 +398,11 @@ class AdminController {
                 const courseId = req.params.id;
                 const courseInstance = await models.Courses.findByPk(courseId);
                 if (!courseInstance) {
-                    return res.status(404).send('Курс не найден');
+                    req.session.previousUrl = req.headers.referer;
+                    return res.render('./layouts/error.hbs', { layout: "error.hbs", errorMessage: 'Курс не найден' });
                 }
                 await courseInstance.destroy();
-                res.send('Курс успешно удален');
+                return res.render('./layouts/infoAdmin.hbs', { layout: "infoAdmin.hbs", message: 'Курс успешно удален' });
             });
         } catch (error) {
             console.error('Ошибка при удалении курса:', error);
@@ -397,7 +415,8 @@ class AdminController {
             await isAdmin(req, res, async () => {
                 const type = await models.CourseTypes.findByPk(id);
                 if (!type) {
-                    return res.status(404).send('Тип не найден');
+                    req.session.previousUrl = req.headers.referer;
+                    return res.render('./layouts/error.hbs', { layout: "error.hbs", errorMessage: 'Тип не найден' });
                 }
                 await type.destroy();
                 return res.render('./layouts/infoAdmin.hbs', { layout: "infoAdmin.hbs", message: 'Тип успешно удален' });
@@ -415,7 +434,8 @@ class AdminController {
             await isAdmin(req, res, async () => {
                 const user = await models.Users.findByPk(id);
                 if (!user) {
-                    return res.status(404).send('Пользователь не найден');
+                    req.session.previousUrl = req.headers.referer;
+                    return res.render('./layouts/error.hbs', { layout: "error.hbs", errorMessage: 'User не найден' });
                 }
                 await user.destroy();
                 return res.render('./layouts/infoAdmin.hbs', { layout: "infoAdmin.hbs", message: 'Пользователь успешно удален' });
@@ -433,11 +453,11 @@ class AdminController {
 
                 const video = await models.Videos.findByPk(id);
                 if (!video) {
-                    return res.status(404).send('Видео не найдено');
+                    req.session.previousUrl = req.headers.referer;
+                    return res.render('./layouts/error.hbs', { layout: "error.hbs", errorMessage: 'Видео не найдено' });
                 }
                 await video.destroy();
-
-                res.status(200).send({ message: 'Видео успешно удалено' });
+                return res.render('./layouts/infoAdmin.hbs', { layout: "infoAdmin.hbs", message: 'Видео успешно удалено' });
             });
         } catch (error) {
             console.error('Ошибка при удалении видео:', error);
@@ -451,10 +471,11 @@ class AdminController {
             await isAdmin(req, res, async () => {
                 const type = await models.Tasks.findByPk(id);
                 if (!type) {
-                    return res.status(404).send('Задание не найдено');
+                    req.session.previousUrl = req.headers.referer;
+                    return res.render('./layouts/error.hbs', { layout: "error.hbs", errorMessage: 'Задание не найдено' });
                 }
                 await type.destroy();
-                return res.render('./layouts/infoAdmin.hbs', { layout: "infoAdmin.hbs", message: 'Видео успешно удалено' });
+                return res.render('./layouts/infoAdmin.hbs', { layout: "infoAdmin.hbs", message: 'Задание успешно удалено' });
             });
         } catch (error) {
             console.error('Ошибка при удалении вопроса:', error);
@@ -468,27 +489,11 @@ class AdminController {
             await isAdmin(req, res, async () => {
                 const type = await models.Answers.findByPk(id);
                 if (!type) {
-                    return res.status(404).send('Ответ не найдено');
+                    req.session.previousUrl = req.headers.referer;
+                    return res.render('./layouts/error.hbs', { layout: "error.hbs", errorMessage: 'Ответ не найден' });
                 }
                 await type.destroy();
-                return res.render('./layouts/infoAdmin.hbs', { layout: "infoAdmin.hbs", message: 'Видео успешно удалено' });
-            });
-        } catch (error) {
-            console.error('Ошибка при удалении ответа:', error);
-            res.status(500).send('Произошла ошибка при удалении ответа');
-        }
-    }
-
-    async deleteVideo(req, res) {
-        const { id } = req.params;
-        try {
-            await isAdmin(req, res, async () => {
-                const video = await models.Videos.findByPk(id);
-                if (!video) {
-                    return res.status(404).send('Видео не найдено');
-                }
-                await video.destroy();
-                return res.render('./layouts/infoAdmin.hbs', { layout: "infoAdmin.hbs", message: 'Видео успешно удалено' });
+                return res.render('./layouts/infoAdmin.hbs', { layout: "infoAdmin.hbs", message: 'Ответ успешно удален' });
             });
         } catch (error) {
             console.error('Ошибка при удалении ответа:', error);

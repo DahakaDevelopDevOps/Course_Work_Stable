@@ -112,14 +112,14 @@
         {{> header}}
     <div class="container">
         <h1>Видео курса</h1>
-        {{#each videous}}
-        <div class="video">
-            <video controls>
-                <source src="{{this.video_url}}" type="video/mp4">
-                Your browser does not support the video tag.
-            </video>
-        </div>
-        {{/each}}
+{{#each videous}}
+<div class="video-container">
+    <video width="320" height="240" controls>
+        <source src="{{this.video_url}}" type="video/mp4">
+        Your browser does not support the video tag.
+    </video>
+</div>
+{{/each}}
 
         <h1>Тесты для курса</h1>
         <form id="testForm">

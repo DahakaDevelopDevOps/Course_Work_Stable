@@ -109,22 +109,34 @@ class ProfileController {
             if (!req.session.userId) {
                 return res.render("./layouts/registration.hbs", { layout: "registration.hbs" });
             }
-            
+
             const videous = await models.Videos.findAll({ where: { course_id: courseId } });
-    
+            if (videous.length < 1) {
+                req.session.previousUrl = req.headers.referer;
+                return res.render('./layouts/error.hbs', { layout: "error.hbs", errorMessage: 'Извиняемся, пока курс в доработке' });
+            }
+            const videosWithUrls = videous.map(video => {
+                const base64Video = video.video_content.toString('base64');
+                return {
+                    ...video,
+                    video_url: `data:video/mp4;base64,${base64Video}`
+                };
+            });
+
             const tasksDetails = await models.Tasks.findAll({
                 where: { course_id: courseId },
                 include: { model: models.Answers }
             });
-    
+
             if (!tasksDetails) {
-                throw new Error("Tasks not found");
+                req.session.previousUrl = req.headers.referer;
+                return res.render('./layouts/error.hbs', { layout: "error.hbs", errorMessage: 'нет теста' });
             }
 
             const tasks = tasksDetails.map(detail => {
                 return {
                     test_id: detail.test_id,
-                    course_id:detail.course_id,
+                    course_id: detail.course_id,
                     question_text: detail.question_text,
                     answers: detail.Answers.map(answer => ({
                         answer_id: answer.answer_id,
@@ -133,7 +145,7 @@ class ProfileController {
                     }))
                 };
             });
-            res.render("./layouts/exstensionCourse.hbs", { layout: "exstensionCourse.hbs", tasks: tasks, videous: videous });
+            res.render("./layouts/exstensionCourse.hbs", { layout: "exstensionCourse.hbs", tasks: tasks, videous: videosWithUrls  });
         } catch (error) {
             console.error('Ошибка при получении курсов в процессе:', error.message);
             res.status(500).send('Произошла ошибка при получении курсов в процессе');
@@ -142,13 +154,16 @@ class ProfileController {
 
     async updateCourseStatus(req, res) {
         const { courseId } = req.params;
-        
+        if (!req.session.userId) {
+            return res.render("./layouts/registration.hbs", { layout: "registration.hbs" });
+        }
 
         try {
             const course = await models.Statistics.findOne({ where: { course_id: courseId, user_id: req.session.userId } });
 
             if (!course) {
-                return res.status(404).send('Курс не найден');
+                req.session.previousUrl = req.headers.referer;
+                return res.render('./layouts/error.hbs', { layout: "error.hbs", errorMessage: 'Курс не найден' });    
             }
             await course.update({ status_id: 1, end_date: new Date() });
 
@@ -161,6 +176,7 @@ class ProfileController {
 
     async submitAnswers(req, res) {
         try {
+            
             const { body } = req; // Получаем тело запроса, которое содержит ответы пользователя
             const userAnswers = Object.entries(body) // Преобразуем ответы пользователя в массив пар [questionId, answerId]
                 .filter(([key, value]) => key.startsWith('answer')) // Отфильтровываем только ответы
@@ -168,13 +184,13 @@ class ProfileController {
                     questionId: parseInt(key.replace('answer', '')),
                     answerId: parseInt(value)
                 }));
-    
+
             const results = await Promise.all(userAnswers.map(async ({ questionId, answerId }) => {
                 const task = await models.Tasks.findByPk(questionId, { include: models.Answers });
                 const correctAnswer = task.Answers.find(answer => answer.answer_id === answerId);
                 return { questionId, isCorrect: correctAnswer.is_correct };
             }));
-    
+
             res.json(results);
         } catch (error) {
             console.error('Ошибка при проверке ответов:', error);
