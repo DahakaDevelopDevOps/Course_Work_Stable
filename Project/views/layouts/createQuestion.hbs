@@ -95,7 +95,7 @@
             <div id="correctAnswersContainer">
                 <label for="correctAnswer">Верные ответы:</label>
                 <div class="answer-group">
-                    <input type="text" name="correctAnswers" placeholder="Верный ответ" required>
+                    <input type="text" name="correctAnswer" placeholder="Верный ответ" required>
                     <button type="button" onclick="removeAnswer(this)">Удалить</button>
                 </div>
             </div>
@@ -103,7 +103,7 @@
             <div id="incorrectAnswersContainer">
                 <label for="incorrectAnswer">Неверные ответы:</label>
                 <div class="answer-group">
-                    <input type="text" name="incorrectAnswers" placeholder="Неверный ответ" required>
+                    <input type="text" name="incorrectAnswer" placeholder="Неверный ответ" required>
                     <button type="button" onclick="removeAnswer(this)">Удалить</button>
                 </div>
             </div>
@@ -119,19 +119,20 @@
             const container = document.getElementById(containerId);
             const answerGroupCount = container.querySelectorAll('.answer-group').length;
             const isCorrect = containerId === 'correctAnswersContainer';
-            
+
             if ((isCorrect && answerGroupCount >= 4) || (!isCorrect && answerGroupCount >= 4)) {
                 alert('Можно добавить не более 4 верных и 4 неверных ответов.');
                 return;
             }
-            
+
+
             const newAnswerGroup = document.createElement('div');
             newAnswerGroup.className = 'answer-group';
             newAnswerGroup.innerHTML = `
-                <input type="text" name="${isCorrect ? 'correctAnswers' : 'incorrectAnswers'}" placeholder="${isCorrect ? 'Верный ответ' : 'Неверный ответ'}" required>
+                <input type="text" name="${isCorrect ? 'correctAnswer' : 'incorrectAnswer'}" placeholder="${isCorrect ? 'Верный ответ' : 'Неверный ответ'}" required>
                 <button type="button" onclick="removeAnswer(this)">Удалить</button>
             `;
-                container.appendChild(newAnswerGroup);
+            container.appendChild(newAnswerGroup);
         }
 
         function removeAnswer(button) {
@@ -140,29 +141,49 @@
         }
 
         document.getElementById('createQuestionForm').addEventListener('submit', function (event) {
-            const correctAnswerCount = document.querySelectorAll('#correctAnswersContainer .answer-group').length;
-            const incorrectAnswerCount = document.querySelectorAll('#incorrectAnswersContainer .answer-group').length;
+            const correctAnswerInputs = document.querySelectorAll('#correctAnswersContainer input[name="correctAnswer"]');
+            const incorrectAnswerInputs = document.querySelectorAll('#incorrectAnswersContainer input[name="incorrectAnswer"]');
 
-            if (correctAnswerCount === 0) {
+            const correctAnswers = Array.from(correctAnswerInputs).map(input => input.value);
+            const incorrectAnswers = Array.from(incorrectAnswerInputs).map(input => input.value);
+
+            if (correctAnswers.length === 0) {
                 alert('Необходимо добавить хотя бы один верный ответ.');
                 event.preventDefault();
                 return;
             }
 
-            if (correctAnswerCount > 4) {
+            if (correctAnswers.length > 4) {
                 alert('Можно добавить не более 4 верных ответов.');
                 event.preventDefault();
                 return;
             }
 
-            if (incorrectAnswerCount > 4) {
+            if (incorrectAnswers.length > 4) {
                 alert('Можно добавить не более 4 неверных ответов.');
                 event.preventDefault();
                 return;
             }
+
+            const form = event.target;
+
+            const correctAnswersInput = document.createElement('input');
+            correctAnswersInput.type = 'hidden';
+            correctAnswersInput.name = 'correctAnswers';
+            correctAnswersInput.value = JSON.stringify(correctAnswers);
+
+            const incorrectAnswersInput = document.createElement('input');
+            incorrectAnswersInput.type = 'hidden';
+            incorrectAnswersInput.name = 'incorrectAnswers';
+            incorrectAnswersInput.value = JSON.stringify(incorrectAnswers);
+
+            form.appendChild(correctAnswersInput);
+            form.appendChild(incorrectAnswersInput);
+
+            correctAnswerInputs.forEach(input => input.disabled = true);
+            incorrectAnswerInputs.forEach(input => input.disabled = true);
         });
     </script>
 </body>
 
 </html>
-

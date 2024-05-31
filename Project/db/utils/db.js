@@ -3,7 +3,7 @@ const {  DataTypes } = require('sequelize');
 const  { Sequelize } = require("sequelize");
 
 
-const connection = new Sequelize('busia', 'sa', '1111', {
+const connection = new Sequelize('CourseWork', 'cw', '1111', {
     host: 'localhost',
     dialect: 'mssql',
     port: 1433,
@@ -15,7 +15,7 @@ const connection = new Sequelize('busia', 'sa', '1111', {
 
 const models = initModels(connection);
 
-module.exports = { models, connection };
+ module.exports = { models, connection };
 
 // connection.sync({ alter: true, force: true }) // Use { force: true } to drop existing tables and re-create them
 //   .then(() => {

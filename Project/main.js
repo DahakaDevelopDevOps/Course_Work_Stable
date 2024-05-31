@@ -47,8 +47,8 @@ app.use('/', router);
 const httpServer = http.createServer(app);
 
 // HTTPS Server
-const privateKey = fs.readFileSync('sslcert/server.key', 'utf8');
-const certificate = fs.readFileSync('sslcert/server.crt', 'utf8');
+const privateKey = fs.readFileSync('sslcert/LAB.key', 'utf8');
+const certificate = fs.readFileSync('sslcert/LAB.crt', 'utf8');
 const credentials = { key: privateKey, cert: certificate };
 const httpsServer = https.createServer(credentials, app);
 

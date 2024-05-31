@@ -53,29 +53,45 @@ async login(req, res) {
 // В методе register
 async register(req, res) {
     const { username, email, password } = req.body;
-    const hashedPassword = bcrypt.hashSync(password, 10);
+    
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(email)) {
-            res.status(500).send('Введён неправильный адрес электронной почты, повторите попытку');        }
-    const candidate = await models.Users.findOne({
-        where: {
-            Login: username,
-        },
-    });
-    if (candidate) {
-        req.session.returnUrl = '/auth/register'; // Сохраняем URL регистрации в сессии
-        res.redirect('/auth/register');
-    } else {
-        await models.Users.create({
-            Login: username,
-            Email: email,
-            Password: hashedPassword,
-            Role: 0
-        });
-        req.session.returnUrl = '/auth/login'; // Сохраняем URL входа в сессии
-        res.redirect('/auth/login');
+    if (!emailRegex.test(email)) {
+        req.session.previousUrl = req.headers.referer;
+        return res.render('./layouts/error.hbs', {layout: "error.hbs", errorMessage: 'Некорректный адрес электронной почты' });
     }
+    
+    const hashedPassword = bcrypt.hashSync(password, 10);   
+    const existingUser = await models.Users.findOne({
+        where: {
+            Email: email
+        }
+    });
+
+    if (existingUser) {
+        req.session.previousUrl = req.headers.referer;
+        return res.render('./layouts/error.hbs', {layout: "error.hbs", errorMessage: 'Этот адрес электронной почты уже используется' });
+    }
+
+    const existingUserLogin = await models.Users.findOne({
+        where: {
+            Login: username
+        }
+    });
+    
+    if (existingUserLogin) {
+        req.session.previousUrl = req.headers.referer;
+        return res.render('./layouts/error.hbs', {layout: "error.hbs", errorMessage: 'Этот логин уже занят' });
+    }
+
+    await models.Users.create({
+        Login: username,
+        Email: email,
+        Password: hashedPassword,
+        Role: 0
+    });       
+    res.redirect('/auth/login');
 }
+
 
 }
 

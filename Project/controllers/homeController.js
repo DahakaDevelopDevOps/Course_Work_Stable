@@ -1,4 +1,4 @@
-// const asyncHandler = require("express-async-handler");
+const asyncHandler = require("express-async-handler");
 
 exports.getMainPage = (req, res, next) => {
     res.render("./layouts/home.hbs", { layout: "home.hbs" });

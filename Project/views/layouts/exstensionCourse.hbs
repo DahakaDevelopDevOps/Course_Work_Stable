@@ -136,69 +136,70 @@
                     </li>
                     {{/each}}
                 </ul>
-            </div>
+            </div>     <button type="button" id="finishButton" class="hidden" data-course-id="{{this.course_id}}">Завершить</button>
             {{/each}}
-                        <button type="button" id="finishButton" class="hidden" data-course-id="{{this.course_id}}">Завершить</button>
+                   
             <button type="submit">Отправить ответы</button>
         </form>
     </div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const testForm = document.getElementById('testForm');
-            const finishButton = document.getElementById('finishButton');
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const testForm = document.getElementById('testForm');
+        const finishButton = document.getElementById('finishButton');
 
-            testForm.addEventListener('submit', function (event) {
-                event.preventDefault();
-                let allCorrect = true;
+        testForm.addEventListener('submit', function (event) {
+            event.preventDefault();
+            let allCorrect = true;
 
-                const tasks = document.querySelectorAll('.task');
+            const tasks = document.querySelectorAll('.task');
 
-                tasks.forEach(task => {
-                    const selectedAnswers = task.querySelectorAll('input[type="checkbox"]:checked');
-                    const correctAnswers = task.querySelectorAll('input[type="checkbox"][data-is-correct="true"]');
-                    const selectedCorrectAnswers = Array.from(selectedAnswers).filter(answer => answer.dataset.isCorrect === 'true');
+            tasks.forEach(task => {
+                const selectedAnswers = task.querySelectorAll('input[type="checkbox"]:checked');
+                const correctAnswers = task.querySelectorAll('input[type="checkbox"][data-is-correct="true"]');
+                const selectedCorrectAnswers = Array.from(selectedAnswers).filter(answer => answer.dataset.isCorrect === 'true');
 
-                    if (selectedAnswers.length === correctAnswers.length && selectedCorrectAnswers.length === correctAnswers.length) {
-                        task.classList.add('correct');
-                        task.classList.remove('incorrect');
-                    } else {
-                        task.classList.add('incorrect');
-                        task.classList.remove('correct');
-                        allCorrect = false;
-                    }
-                });
-
-                if (allCorrect) {
-                    finishButton.classList.remove('hidden');
-                    alert('Все ответы верны! Нажмите "Завершить" для продолжения.');
+                if (selectedAnswers.length === correctAnswers.length && selectedCorrectAnswers.length === correctAnswers.length) {
+                    task.classList.add('correct');
+                    task.classList.remove('incorrect');
                 } else {
-                    alert('Есть неверные ответы. Пожалуйста, проверьте и исправьте ошибки.');
+                    task.classList.add('incorrect');
+                    task.classList.remove('correct');
+                    allCorrect = false;
                 }
             });
 
-            finishButton.addEventListener('click', async function () {
-                const courseId = this.dataset.courseId;
-                if (!courseId) {
-                    console.error('ID курса отсутствует');
-                    return;
-                }
-
-                try {
-                    const response = await fetch(`/profile/updateStatus/${courseId}`, {
-                        method: 'POST'
-                    });
-                    if (response.ok) {
-                        window.location.reload();
-                    } else {
-                        console.error('Ошибка при обновлении статуса курса');
-                    }
-                } catch (error) {
-                    console.error('Ошибка при обновлении статуса курса:', error);
-                }
-            });
+            if (allCorrect) {
+                finishButton.classList.remove('hidden');
+                alert('Все ответы верны! Нажмите "Завершить" для продолжения.');
+            } else {
+                alert('Есть неверные ответы. Пожалуйста, проверьте и исправьте ошибки.');
+            }
         });
-    </script>
+
+        finishButton.addEventListener('click', async function () {
+            const courseId = this.dataset.courseId;
+            if (!courseId) {
+                console.error('ID курса отсутствует');
+                return;
+            }
+
+            try {
+                const response = await fetch(`/profile/updateStatus/${courseId}`, {
+                    method: 'POST'
+                });
+                if (response.ok) {
+                    alert('Отлично, курс завершен');
+                     window.location.href = `/profile`;
+                } else {
+                    console.error('Ошибка при обновлении статуса курса:', response.statusText);
+                }
+            } catch (error) {
+                console.error('Ошибка при обновлении статуса курса:', error);
+            }
+        });
+    });
+</script>
 
 </body>
 

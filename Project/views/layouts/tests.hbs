@@ -42,7 +42,7 @@
     <!-- Список всех тестов -->
     <h2>All Tests</h2>
     <div id="tests-container">
-        {{#each tests}}
+        {{#each tests}}ф
         <div class="test-card" id="test-{{this.id}}">
             <h3>{{this.test_name}}</h3>
             <p>Course: {{this.Course.course_name}}</p>
@@ -107,92 +107,3 @@
             const selectedCourseId = this.value;
             filterTestsByCourse(selectedCourseId);
         });
-
-        // Обработчик события изменения выбранного типа сортировки
-        document.getElementById('sort-select').addEventListener('change', function () {
-            const selectedSortType = this.value;
-            if (selectedSortType === 'course') {
-                sortTestsByCourse();
-            }
-            // Добавьте другие варианты сортировки, если необходимо
-        });
-
-        let questionCount = 0;
-
-        function addQuestion() {
-            questionCount++;
-
-            const questionContainer = document.getElementById('questions-container');
-
-            const questionDiv = document.createElement('div');
-            questionDiv.classList.add('question');
-
-            const questionLabel = document.createElement('label');
-            questionLabel.textContent = `Question ${questionCount}:`;
-            const questionInput = document.createElement('input');
-            questionInput.type = 'text';
-            questionInput.name = `question-${questionCount}`;
-            questionInput.required = true;
-
-            const answerLabel = document.createElement('label');
-            answerLabel.textContent = 'Answers:';
-            const answerInput = document.createElement('input');
-            answerInput.type = 'text';
-            answerInput.name = `answer-${questionCount}-1`;
-            answerInput.required = true;
-
-            const correctLabel = document.createElement('label');
-            correctLabel.textContent = 'Correct:';
-            const correctInput = document.createElement('input');
-            correctInput.type = 'checkbox';
-            correctInput.name = `correct-${questionCount}-1`;
-
-            questionDiv.appendChild(questionLabel);
-            questionDiv.appendChild(questionInput);
-
-            const answerDiv = document.createElement('div');
-            answerDiv.classList.add('answers');
-            answerDiv.appendChild(answerLabel);
-            answerDiv.appendChild(answerInput);
-            answerDiv.appendChild(correctLabel);
-            answerDiv.appendChild(correctInput);
-
-            questionDiv.appendChild(answerDiv);
-
-            questionContainer.appendChild(questionDiv);
-        }
-
-        function addTest(event) {
-            event.preventDefault();
-
-            const testName = document.getElementById('test-name').value;
-            const courseId = document.getElementById('course-id').value;
-
-            const questions = [];
-
-            const questionInputs = document.querySelectorAll('.question');
-            questionInputs.forEach(questionInput => {
-                const questionText = questionInput.querySelector('input[type="text"]').value;
-                const answers = [];
-                const answerInputs = questionInput.querySelectorAll('.answers');
-                answerInputs.forEach(answerInput => {
-                    const answerText = answerInput.querySelector('input[type="text"]').value;
-                    const isCorrect = answerInput.querySelector('input[type="checkbox"]').checked;
-                    answers.push({ answer: answerText, correct: isCorrect });
-                });
-                questions.push({ question: questionText, answers: answers });
-            });
-
-            const data = {
-                test_name: testName,
-                course_id: courseId,
-                questions: questions
-            };
-
-            console.log(data); // Отправка данных на сервер или выполнение других действий
-        }
-    </script>
-</body>
-
-</html>
-

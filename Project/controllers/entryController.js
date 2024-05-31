@@ -12,6 +12,15 @@ class EntryController {
                 req.session.returnUrl = req.originalUrl;
                 return res.redirect('/auth/login');
             }
+            const admin = await models.Users.findByPk(req.session.userId);
+            if(admin && admin.Role == 1){
+                req.session.previousUrl = req.headers.referer;
+                return res.render('./layouts/error.hbs', { layout: "error.hbs", errorMessage: 'Вы не можете записаться на курс' });
+            }
+            if(!admin){
+                req.session.previousUrl = req.headers.referer;
+                return res.render('./layouts/error.hbs', { layout: "error.hbs", errorMessage: 'Вы не можете записаться на курс' });
+            }
             const data = await models.Statistics.findOne({
                 where:{
                     user_id: req.session.userId,
@@ -42,7 +51,15 @@ async addEntry(req, res) {
     try {
         const courseId = req.params.id;
         const { email } = req.body; 
-
+        const admin = await models.Users.findByPk(req.session.userId);
+        if(admin && admin.Role == 1){
+            req.session.previousUrl = req.headers.referer;
+            return res.render('./layouts/error.hbs', { layout: "error.hbs", errorMessage: 'Вы не можете записаться на курс' });
+        }
+        if(!admin){
+            req.session.previousUrl = req.headers.referer;
+            return res.render('./layouts/error.hbs', { layout: "error.hbs", errorMessage: 'Вы не можете записаться на курс' });
+        }
         const existingEntry = await models.Statistics.findOne({
             where: {
                 user_id: req.session.userId,
@@ -57,7 +74,7 @@ async addEntry(req, res) {
             user_id: req.session.userId, 
             course_id: courseId,
             start_date: new Date(), 
-            status_id: 2, 
+            status_id: 6, 
         });
 
         // Отправляем сообщение пользователю о записи на курс
@@ -84,7 +101,7 @@ async addEntry(req, res) {
             }
         });
 
-        res.render('./layouts/info.hbs', {layout: "info.hbs", message: 'Спасибо что записались на мастер-класс' });
+        res.render('./layouts/info.hbs', {layout: "info.hbs", message: 'Спасибо что записались на курс' });
            
         // res.redirect('/courses');
     } catch (error) {

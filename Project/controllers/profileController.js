@@ -8,6 +8,14 @@ class ProfileController {
             return res.render("./layouts/registration.hbs", { layout: "registration.hbs" });
         }
         try {
+            const admin = await models.Users.findByPk(req.session.userId);
+        if(admin && admin.Role == 1){
+            res.redirect('/admin');
+        }
+        if(!admin){
+            req.session.previousUrl = req.headers.referer;
+            return res.render('./layouts/error.hbs', { layout: "error.hbs", errorMessage: 'Нужен вход' });
+        }
             const courses = await models.Statistics.findAll({
                 where: { user_id: req.session.userId },
                 include: [
@@ -36,10 +44,18 @@ class ProfileController {
             return res.render("./layouts/registration.hbs", { layout: "registration.hbs" });
         }
         try {
+            const admin = await models.Users.findByPk(req.session.userId);
+        if(admin && admin.Role == 1){
+            res.redirect('/admin');
+        }
+        if(!admin){
+            req.session.previousUrl = req.headers.referer;
+            return res.render('./layouts/error.hbs', { layout: "error.hbs", errorMessage: 'Нужен вход' });
+        }
             const coursesWithDetails = await models.Statistics.findAll({
                 where: {
                     user_id: req.session.userId,
-                    status_id: 1
+                    status_id: 5
                 },
                 include: [
                     {
@@ -72,10 +88,18 @@ class ProfileController {
             return res.render("./layouts/registration.hbs", { layout: "registration.hbs" });
         }
         try {
+            const admin = await models.Users.findByPk(req.session.userId);
+            if(admin && admin.Role == 1){
+                res.redirect('/admin');
+            }
+            if(!admin){
+                req.session.previousUrl = req.headers.referer;
+                return res.render('./layouts/error.hbs', { layout: "error.hbs", errorMessage: 'Нужен вход' });
+            }
             const coursesWithDetails = await models.Statistics.findAll({
                 where: {
                     user_id: req.session.userId,
-                    status_id: 2
+                    status_id: 6
                 },
                 include: [
                     {
@@ -104,12 +128,20 @@ class ProfileController {
     }
 
     async getCourse(req, res) {
-        try {
-            const { courseId } = req.params;
-            if (!req.session.userId) {
+        try {  if (!req.session.userId) {
                 return res.render("./layouts/registration.hbs", { layout: "registration.hbs" });
             }
 
+            const admin = await models.Users.findByPk(req.session.userId);
+        if(admin && admin.Role == 1){
+            res.redirect('/admin');
+        }
+        if(!admin){
+            req.session.previousUrl = req.headers.referer;
+            return res.render('./layouts/error.hbs', { layout: "error.hbs", errorMessage: 'Нужен вход' });
+        }
+            const { courseId } = req.params;
+          
             const videous = await models.Videos.findAll({ where: { course_id: courseId } });
             if (videous.length < 1) {
                 req.session.previousUrl = req.headers.referer;
@@ -128,9 +160,9 @@ class ProfileController {
                 include: { model: models.Answers }
             });
 
-            if (!tasksDetails) {
+            if (tasksDetails.length < 1) {
                 req.session.previousUrl = req.headers.referer;
-                return res.render('./layouts/error.hbs', { layout: "error.hbs", errorMessage: 'нет теста' });
+                return res.render('./layouts/error.hbs', { layout: "error.hbs", errorMessage: 'Извиняемся, пока курс в доработке' });
             }
 
             const tasks = tasksDetails.map(detail => {
@@ -159,13 +191,21 @@ class ProfileController {
         }
 
         try {
+            const admin = await models.Users.findByPk(req.session.userId);
+        if(admin && admin.Role == 1){
+            res.redirect('/admin');
+        }
+        if(!admin){
+            req.session.previousUrl = req.headers.referer;
+            return res.render('./layouts/error.hbs', { layout: "error.hbs", errorMessage: 'Нужен вход' });
+        }
             const course = await models.Statistics.findOne({ where: { course_id: courseId, user_id: req.session.userId } });
 
             if (!course) {
                 req.session.previousUrl = req.headers.referer;
                 return res.render('./layouts/error.hbs', { layout: "error.hbs", errorMessage: 'Курс не найден' });    
             }
-            await course.update({ status_id: 1, end_date: new Date() });
+            await course.update({ status_id: 5, end_date: new Date() });
 
             res.redirect('/profile');
         } catch (error) {
@@ -176,7 +216,14 @@ class ProfileController {
 
     async submitAnswers(req, res) {
         try {
-            
+            const admin = await models.Users.findByPk(req.session.userId);
+        if(admin && admin.Role == 1){
+            res.redirect('/admin');
+        }
+        if(!admin){
+            req.session.previousUrl = req.headers.referer;
+            return res.render('./layouts/error.hbs', { layout: "error.hbs", errorMessage: 'Нужен вход' });
+        }
             const { body } = req; // Получаем тело запроса, которое содержит ответы пользователя
             const userAnswers = Object.entries(body) // Преобразуем ответы пользователя в массив пар [questionId, answerId]
                 .filter(([key, value]) => key.startsWith('answer')) // Отфильтровываем только ответы

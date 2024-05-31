@@ -265,7 +265,7 @@ class AdminController {
                 const { courseName, description, details, duration, courseType } = req.body;
                 if (duration <= 0 || duration >= 100) {
                     req.session.previousUrl = req.headers.referer;
-                    return res.render('./layouts/error.hbs', { layout: "error.hbs", errorMessage: 'Продолжительность курса должна быть больше 0 и меньше 100' });
+                    return res.render('./layouts/error.hbs', { layout: "error.hbs", errorMessage: 'Продолжительность курса должна быть больше 0 и меньше 1000' });
                 }
 
                 const existingCourse = await models.Courses.findOne({
@@ -325,8 +325,10 @@ class AdminController {
                 const { courseId, questionText, correctAnswers, incorrectAnswers } = req.body;
                 console.log(correctAnswers)
                 console.log(incorrectAnswers)
+                const correctAnswers1 = JSON.parse(correctAnswers);
+                const incorrectAnswers1 = JSON.parse(incorrectAnswers);
 
-                if (!courseId || !questionText || !answers || correctAnswers.length < 1 || correctAnswers.length > 4 || incorrectAnswers.length < 1 || incorrectAnswers.length > 4) {
+                if (!courseId || !questionText || !answers || correctAnswers1.length < 1 || correctAnswers1.length > 4 || incorrectAnswers1.length < 1 || incorrectAnswers1.length > 4) {
                     req.session.previousUrl = req.headers.referer;
                     return res.render('./layouts/error.hbs', { layout: "error.hbs", errorMessage: 'Неверные данные. Верных  и неверных ответов должно быть не меньше 1 и не больше 4.' });
                 }
@@ -338,14 +340,14 @@ class AdminController {
                 });
 
                 // Создание ответов
-                for (const answer of correctAnswers) {
+                for (const answer of correctAnswers1) {
                     await models.Answers.create({
                         test_id: newQuestion.test_id,
                         answer_text: answer,
                         is_correct: 1
                     });
                 }
-                for (const answer of incorrectAnswers) {
+                for (const answer of incorrectAnswers1) {
                     await models.Answers.create({
                         test_id: newQuestion.test_id,
                         answer_text: answer,
@@ -360,8 +362,7 @@ class AdminController {
             }
         });
     }
-
-
+    
 
     async addType(req, res) {
         try {

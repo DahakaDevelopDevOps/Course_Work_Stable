@@ -4,8 +4,6 @@
 <head>
     <meta charset="UTF-8">
     <title>Manage Course Types</title>
-    <link rel="stylesheet" href="/path/to/your/css/styles.css">
-    <script src="/path/to/your/js/scripts.js" defer></script>
     <style>
         .card {
             border: 1px solid #ccc;
@@ -73,50 +71,48 @@
         {{/each}}
     </div>
 
-    <script>
-       document.addEventListener('DOMContentLoaded', () => {
-    async function updateType(event, typeId) {
-        event.preventDefault();
+     <script>
+        async function updateType(event, typeId) {
+            event.preventDefault();
 
-        const typeName = document.getElementById(`edit-type-name-${typeId}`).value;
-        const description = document.getElementById(`edit-description-${typeId}`).value;
-        const otherDetails = document.getElementById(`edit-other-details-${typeId}`).value;
+            const typeName = document.getElementById(`edit-type-name-${typeId}`).value;
+            const description = document.getElementById(`edit-description-${typeId}`).value;
+            const otherDetails = document.getElementById(`edit-other-details-${typeId}`).value;
 
-        console.log('Updating type with data:', { type_name: typeName, description, other_details: otherDetails });
+            console.log('Updating type with data:', { type_name: typeName, description, other_details: otherDetails });
 
-        try {
-            const response = await fetch(`/admin/editType/${typeId}`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ type_name: typeName, description: description, other_details: otherDetails })
-            });
+            try {
+                const response = await fetch(`/admin/editType/${typeId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ type_name: typeName, description: description, other_details: otherDetails })
+                });
 
-            if (!response.ok) {
-                throw new Error('Failed to update type');1
+                if (!response.ok) {
+                    throw new Error('Failed to update type');
+                }
+
+                alert('Type updated successfully');
+                location.reload();
+            } catch (error) {
+                console.error('Error updating type:', error);
+                alert('Error updating type');
             }
-
-            alert('Type updated successfully');
-            location.reload();
-        } catch (error) {
-            console.error('Error updating type:', error);
-            alert('Error updating type');
         }
-    }
+        
 
-    document.querySelectorAll('.edit-form form').forEach(form => {
-        form.addEventListener('submit', event => {
-            const typeId = form.closest('.card').getAttribute('id').split('-')[1];
-            updateType(event, typeId);
-        });
-    });
-});
-
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('.edit-form form').forEach(form => {
+                form.addEventListener('submit', event => {
+                    const typeId = form.closest('.card').getAttribute('id').split('-')[1];
+                    updateType(event, typeId);
+                });
+            });
 
             document.querySelectorAll('.delete-button').forEach(button => {
                 button.addEventListener('click', async () => {
-
                     const typeId = button.dataset.typeId;
                     try {
                         if (confirm('Вы уверены, что хотите удалить этот тип?')) {
@@ -134,17 +130,15 @@
                     }
                 });
             });
-
-
-            window.showEditForm = (typeId) => {
-                document.getElementById(`edit-form-${typeId}`).style.display = 'block';
-            };
-
-            window.hideEditForm = (typeId) => {
-                document.getElementById(`edit-form-${typeId}`).style.display = 'none';
-            };
         });
 
+        window.showEditForm = (typeId) => {
+            document.getElementById(`edit-form-${typeId}`).style.display = 'block';
+        };
+
+        window.hideEditForm = (typeId) => {
+            document.getElementById(`edit-form-${typeId}`).style.display = 'none';
+        };
     </script>
 </body>
 
