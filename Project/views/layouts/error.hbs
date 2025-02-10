@@ -2,17 +2,70 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Error</title>
     <style>
-
+        body {
+            font-family: Arial, sans-serif;
+            background-image: url('/background.png');
+            background-size: cover;
+            background-position: center;
+            height: 100vh;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .error-container {
+            width: 100%;
+            max-width: 400px;
+            padding: 30px;
+            background-color: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+            animation: fadeIn 0.8s ease-in-out;
+            text-align: center;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .error-title {
+            font-size: 24px;
+            font-weight: bold;
+            color: #dc3545;
+            margin-bottom: 15px;
+        }
+        .error-message {
+            font-size: 16px;
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .btn-back {
+            background-color: #6c757d;
+            color: #fff;
+            text-align: center;
+            display: block;
+            padding: 12px 20px;
+            width: 100%;
+            text-decoration: none;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: 0.3s;
+            box-sizing: border-box;
+            border: none;
+            cursor: pointer;
+        }
+        .btn-back:hover {
+            background-color: #545b62;
+            transform: scale(1.05);
+        }
     </style>
 </head>
 <body>
     <div class="error-container">
-        <h1>ОШИБКА!</h1>
-        <p>{{errorMessage}}</p>
-        <a href="#" class="go-back-link" onclick="goBackToPage()">Назад</a>
+        <h1 class="error-title">ОШИБКА!</h1>
+        <p class="error-message">{{errorMessage}}</p>
+        <button class="btn-back" onclick="goBackToPage()">Назад</button>
     </div>
 
     <script>
@@ -27,4 +80,3 @@
     </script>
 </body>
 </html>
-

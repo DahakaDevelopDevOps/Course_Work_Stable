@@ -1,37 +1,68 @@
-<header style="background-color: #4567b7; padding: 1rem; text-align: center;">
+<header class="header-container">
     <nav>
-        <ul style="list-style: none; margin: 0; padding: 0; display: flex; justify-content: space-between;">
-            <li style="margin-right: 20px;"><a href="/courses" style="color: #ffffff; text-decoration: none;">Курсы</a></li>
-            <li style="margin-right: 20px;"><a href="/profile" style="color: #ffffff; text-decoration: none;">Ваш профиль</a></li>
-            <li id="login-logout" style="margin-right: 20px;"><a id="login-logout-link" href="/auth/login" style="color: #ffffff; text-decoration: none;">Вход</a></li>
+        <ul>
+            <li><a href="/courses">Курсы</a></li>
+            <li><a href="/profile">Ваш профиль</a></li>
+            <li id="login-logout"><a id="login-logout-link" href="/auth/login">Вход</a></li>
         </ul>
     </nav>
 </header>
 
+<style>
+    .header-container {
+        background-color: rgba(69, 103, 183, 0.9); /* Полупрозрачный фон */
+        padding: 15px 0;
+        width: 100%;
+        position: fixed; /* Закрепляем хедер */
+        top: 0;
+        left: 0;
+        display: flex;
+        justify-content: center;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        z-index: 1000; /* Поднимаем над другими элементами */
+    }
+
+    .header-container nav ul {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        gap: 20px;
+    }
+
+    .header-container nav ul li {
+        display: inline;
+    }
+
+    .header-container nav ul li a {
+        color: #ffffff;
+        text-decoration: none;
+        font-size: 18px;
+        padding: 10px 15px;
+        transition: background 0.3s, transform 0.2s;
+    }
+
+    .header-container nav ul li a:hover {
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 5px;
+        transform: scale(1.05);
+    }
+</style>
+
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-    const loginLogoutLink = document.getElementById('login-logout-link');
-    const xhr = new XMLHttpRequest();
-    xhr.onreadystatechange = function() {
-        if (xhr.readyState === XMLHttpRequest.DONE) {
-            if (xhr.status === 200) {
-                const isAuthenticated = JSON.parse(xhr.responseText).isAuthenticated;
-
-                // Изменяем текст и ссылку в зависимости от статуса аутентификации
-                if (isAuthenticated) {
+        const loginLogoutLink = document.getElementById('login-logout-link');
+        fetch('/auth/status')
+            .then(response => response.json())
+            .then(data => {
+                if (data.isAuthenticated) {
                     loginLogoutLink.textContent = 'Выход';
                     loginLogoutLink.href = '/auth/logout';
                 } else {
                     loginLogoutLink.textContent = 'Вход';
                     loginLogoutLink.href = '/auth/login';
                 }
-            } else {
-                console.error('Произошла ошибка при выполнении AJAX-запроса');
-            }
-        }
-    };
-    xhr.open('GET', '/auth/status', true); // Путь '/auth/status' предполагает наличие на сервере соответствующего маршрута для проверки статуса аутентификации
-    xhr.send();
-});
-
+            })
+            .catch(error => console.error('Ошибка при получении статуса авторизации:', error));
+    });
 </script>

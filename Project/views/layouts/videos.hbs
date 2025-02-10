@@ -81,10 +81,19 @@
 
 {{#each videos}}
 <div class="video-container">
-    <video width="320" height="240" controls>
-        <source src="{{this.video_url}}" type="video/mp4">
-        Your browser does not support the video tag.
-    </video>
+<div class="video-info">
+        <div class="video-info">
+            <h2>{{this.VideoDescription}}</h2>
+            <p><strong>Курс:</strong> {{this.Course.CourseName}}</p>
+            <p><strong>Описание курса:</strong> {{this.Course.Description}}</p>
+            <p><strong>Длительность курса:</strong> {{this.Course.Duration}} часов</p>
+        </div>
+        <div class="video-container">
+            <video controls>
+                <source src="/videos/{{this.video_id}}" type="video/mp4">
+                Ваш браузер не поддерживает тег video.
+            </video>
+        </div>
     <form action="/admin/delete-video/{{this.video_id}}" method="POST">
         <button type="submit">Удалить видео</button>
     </form>

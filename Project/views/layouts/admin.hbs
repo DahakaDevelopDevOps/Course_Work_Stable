@@ -28,6 +28,33 @@
             color: #007bff;
         }
 
+        .filter {
+            margin-bottom: 20px;
+        }
+
+        .filter label {
+            font-weight: bold;
+        }
+
+        .filter select {
+            padding: 5px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+
+        .filter button {
+            padding: 5px 10px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .filter button:hover {
+            background-color: #0056b3;
+        }
+
         .test {
             border: 1px solid #dee2e6;
             border-radius: 5px;
@@ -48,7 +75,7 @@
             margin-left: 20px;
         }
 
-        button {
+        .delete-button {
             background-color: #dc3545;
             color: white;
             border: none;
@@ -57,21 +84,35 @@
             cursor: pointer;
         }
 
-        button:hover {
+        .delete-button:hover {
             background-color: #c82333;
         }
     </style>
 </head>
 
 <body>
-        {{> adminHeader}}
+    {{> adminHeader}}
     <div class="container">
         <h1>Список тестов</h1>
+
+        <!-- Фильтр по курсу -->
+<div class="filter">
+    <label for="courseFilter">Фильтр по курсу:</label>
+    <select id="courseFilter">
+        <option value="">Все курсы</option>
+        {{#each courses}}
+        <option value="{{this.course_name}}" {{#if (eq this.course_name ../selectedCourse)}}selected{{/if}}>{{this.course_name}}</option>
+        {{/each}}
+    </select>
+    <button onclick="applyFilter()">Применить</button>
+</div>
+
+        <!-- Список тестов -->
         {{#each tests}}
         <div class="test">
             <div class="test-header">
                 <h2>Тест ID: {{this.test_id}}</h2>
-                <p>Курс: {{this.course_id}}</p>
+                <p>Курс: {{this.course.course_name}}</p>
                 <p>Вопрос: {{this.question_text}}</p>
             </div>
             <ul>
@@ -81,12 +122,19 @@
                 </li>
                 {{/each}}
             </ul>
-            <button onclick="deleteTest('{{this.test_id}}')">Удалить</button>
+            <button class="delete-button" onclick="deleteTest('{{this.test_id}}')">Удалить</button>
         </div>
         {{/each}}
     </div>
 
     <script>
+        // Функция для применения фильтра
+function applyFilter() {
+    const courseFilter = document.getElementById('courseFilter').value;
+    window.location.href = `/admin?courseName=${encodeURIComponent(courseFilter)}`;
+}
+
+        // Функция для удаления теста
         function deleteTest(testId) {
             if (confirm("Вы уверены, что хотите удалить этот тест?")) {
                 fetch(`/admin/delete/test/${testId}`, {

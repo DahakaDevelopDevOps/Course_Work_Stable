@@ -1,7 +1,7 @@
 {
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node app.js",
+    "start": "node main.js",
     "dev": "npx nodemon ./main.js --ext js,handlebars,css --watch ./"
   },
   "dependencies": {

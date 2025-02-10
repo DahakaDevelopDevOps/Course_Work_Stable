@@ -1,31 +1,26 @@
 const { initModels } = require('../models/initModels');
-const {  DataTypes } = require('sequelize');
-const  { Sequelize } = require("sequelize");
+const { Sequelize } = require("sequelize");
 
-
-const connection = new Sequelize('CourseWork', 'cw', '1111', {
-    host: 'localhost',
-    dialect: 'mssql',
-    port: 1433,
-    pool: {
-        min: 0,
-        max: 10
-    }
-});
+const connection = new Sequelize(
+  process.env.DB_NAME || 'CourseWork',
+  process.env.DB_USER || 'cw',
+  process.env.DB_PASSWORD || '1111',
+  {
+      host: process.env.DB_HOST || 'db',
+      dialect: 'mssql',
+      port: process.env.DB_PORT || 1433,
+      pool: {
+          min: 0,
+          max: 10,
+      },
+  }
+);
 
 const models = initModels(connection);
 
- module.exports = { models, connection };
+module.exports = { models, connection };
 
-// connection.sync({ alter: true, force: true }) // Use { force: true } to drop existing tables and re-create them
-//   .then(() => {
-//     console.log('Database synchronized successfully.');
-//   })
-//   .catch(err => {
-//     console.error('Unable to synchronize the database:', err);
-//   });
-
-
+// Аутентификация подключения
 connection
   .authenticate()
   .then(() => {
@@ -33,4 +28,13 @@ connection
   })
   .catch(err => {
     console.error('Unable to connect to the database:', err);
+  });
+
+// Синхронизация таблиц
+connection.sync({ alter: true, force: false }) // Убедитесь, что { force: true } используется только при необходимости сброса данных.
+  .then(() => {
+    console.log('Database synchronized successfully.');
+  })
+  .catch(err => {
+    console.error('Unable to synchronize the database:', err);
   });

@@ -109,98 +109,134 @@
 </head>
 
 <body>
-        {{> header}}
+    {{> header}}
     <div class="container">
         <h1>Видео курса</h1>
-{{#each videous}}
-<div class="video-container">
-    <video width="320" height="240" controls>
-        <source src="{{this.video_url}}" type="video/mp4">
-        Your browser does not support the video tag.
-    </video>
-</div>
-{{/each}}
+        {{#each videous}}
+        <div class="video-container">
+            <video width="320" height="240" controls>
+                <source src="{{this.video_url}}" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
+        </div>
+        {{/each}}
 
         <h1>Тесты для курса</h1>
         <form id="testForm">
-            {{#each tasks}}
-            <div class="task" data-test-id="{{this.test_id}}">
-                <h2>{{this.question_text}}</h2>
-                <ul>
-                    {{#each this.answers}}
-                    <li>
-                        <label>
-                            <input type="checkbox" name="answer{{../test_id}}" value="{{this.answer_id}}"
-                                data-is-correct="{{this.is_correct}}"> {{this.answer_text}}
-                        </label>
-                    </li>
-                    {{/each}}
-                </ul>
-            </div>     <button type="button" id="finishButton" class="hidden" data-course-id="{{this.course_id}}">Завершить</button>
-            {{/each}}
-                   
+            <div id="tasksContainer">
+                {{#each tasks}}
+                <div class="task" data-test-id="{{this.test_id}}">
+                    <h2>{{this.question_text}}</h2>
+                    <ul>
+                        {{#each this.answers}}
+                        <li>
+                            <label>
+                                <input type="checkbox" name="answer{{../test_id}}" value="{{this.answer_id}}"
+                                    data-is-correct="{{this.is_correct}}"> {{this.answer_text}}
+                            </label>
+                        </li>
+                        {{/each}}
+                    </ul>
+                </div>
+                {{/each}}
+            </div>
             <button type="submit">Отправить ответы</button>
+            <button type="button" id="finishButton" class="hidden" data-course-id="{{this.course_id}}">Завершить</button>
         </form>
     </div>
 
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const testForm = document.getElementById('testForm');
-        const finishButton = document.getElementById('finishButton');
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Функция для перемешивания массива (алгоритм Фишера-Йетса)
+            function shuffleArray(array) {
+                for (let i = array.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [array[i], array[j]] = [array[j], array[i]];
+                }
+                return array;
+            }
 
-        testForm.addEventListener('submit', function (event) {
-            event.preventDefault();
-            let allCorrect = true;
+            // Перемешивание ответов внутри каждого вопроса
+            function shuffleAnswers(task) {
+                const answersList = task.querySelector('ul');
+                const answers = Array.from(answersList.children);
+                const shuffledAnswers = shuffleArray(answers);
+                answersList.innerHTML = '';
+                shuffledAnswers.forEach(answer => answersList.appendChild(answer));
+            }
 
-            const tasks = document.querySelectorAll('.task');
+            // Получаем контейнер с вопросами
+            const tasksContainer = document.getElementById('tasksContainer');
+            const tasks = Array.from(tasksContainer.children);
 
-            tasks.forEach(task => {
-                const selectedAnswers = task.querySelectorAll('input[type="checkbox"]:checked');
-                const correctAnswers = task.querySelectorAll('input[type="checkbox"][data-is-correct="true"]');
-                const selectedCorrectAnswers = Array.from(selectedAnswers).filter(answer => answer.dataset.isCorrect === 'true');
+            // Перемешиваем вопросы
+            const shuffledTasks = shuffleArray(tasks);
 
-                if (selectedAnswers.length === correctAnswers.length && selectedCorrectAnswers.length === correctAnswers.length) {
-                    task.classList.add('correct');
-                    task.classList.remove('incorrect');
+            // Очищаем контейнер и добавляем перемешанные вопросы
+            tasksContainer.innerHTML = '';
+            shuffledTasks.forEach(task => {
+                // Перемешиваем ответы внутри каждого вопроса
+                shuffleAnswers(task);
+                tasksContainer.appendChild(task);
+            });
+
+            // Обработка отправки формы
+            const testForm = document.getElementById('testForm');
+            const finishButton = document.getElementById('finishButton');
+
+            testForm.addEventListener('submit', function (event) {
+                event.preventDefault();
+                let allCorrect = true;
+
+                const tasks = document.querySelectorAll('.task');
+
+                tasks.forEach(task => {
+                    const selectedAnswers = task.querySelectorAll('input[type="checkbox"]:checked');
+                    const correctAnswers = task.querySelectorAll('input[type="checkbox"][data-is-correct="true"]');
+                    const selectedCorrectAnswers = Array.from(selectedAnswers).filter(answer => answer.dataset.isCorrect === 'true');
+
+                    if (selectedAnswers.length === correctAnswers.length && selectedCorrectAnswers.length === correctAnswers.length) {
+                        task.classList.add('correct');
+                        task.classList.remove('incorrect');
+                    } else {
+                        task.classList.add('incorrect');
+                        task.classList.remove('correct');
+                        allCorrect = false;
+                    }
+                });
+
+                if (allCorrect) {
+                    finishButton.classList.remove('hidden');
+                    alert('Все ответы верны! Нажмите "Завершить" для продолжения.');
                 } else {
-                    task.classList.add('incorrect');
-                    task.classList.remove('correct');
-                    allCorrect = false;
+                    alert('Есть неверные ответы. Пожалуйста, проверьте и исправьте ошибки.');
                 }
             });
 
-            if (allCorrect) {
-                finishButton.classList.remove('hidden');
-                alert('Все ответы верны! Нажмите "Завершить" для продолжения.');
-            } else {
-                alert('Есть неверные ответы. Пожалуйста, проверьте и исправьте ошибки.');
-            }
-        });
-
-        finishButton.addEventListener('click', async function () {
-            const courseId = this.dataset.courseId;
-            if (!courseId) {
-                console.error('ID курса отсутствует');
-                return;
-            }
-
-            try {
-                const response = await fetch(`/profile/updateStatus/${courseId}`, {
-                    method: 'POST'
-                });
-                if (response.ok) {
-                    alert('Отлично, курс завершен');
-                     window.location.href = `/profile`;
-                } else {
-                    console.error('Ошибка при обновлении статуса курса:', response.statusText);
+            // Обработка нажатия кнопки "Завершить"
+            finishButton.addEventListener('click', async function () {
+                const courseId = this.dataset.courseId;
+                if (!courseId) {
+                    console.error('ID курса отсутствует');
+                    return;
                 }
-            } catch (error) {
-                console.error('Ошибка при обновлении статуса курса:', error);
-            }
-        });
-    });
-</script>
 
+                try {
+                    const response = await fetch(`/profile/updateStatus/${courseId}`, {
+                        method: 'POST'
+                    });
+                    if (response.ok) {
+                        alert('Отлично, курс завершен');
+                        window.location.href = `/profile`;
+                    } else {
+                        console.error('Ошибка при обновлении статуса курса:', response.statusText);
+                    }
+                } catch (error) {
+                    console.error('Ошибка при обновлении статуса курса:', error);
+                }
+            });
+        });
+    </script>
 </body>
 
 </html>

@@ -7,7 +7,6 @@ class СoursesController {
         try {
             let courses;
             const { type } = req.query;
-            console.log("ТИппппп " + type)
             if (type) {
                 courses = await models.Courses.findAll({
                     include: [{ model: models.CourseTypes, where: { type_id: type } }],
@@ -37,7 +36,6 @@ class СoursesController {
             if (!course) {
                 return res.status(404).send('Курс не найден');
             }
-            // Получаем название типа курса
         const type = await models.CourseTypes.findOne({ where: { type_id: course.course_type_id }, raw: true });
             res.render('./layouts/courseDetails.hbs', { layout: "courseDetails.hbs", course: course, type: type });
         } catch (error) {

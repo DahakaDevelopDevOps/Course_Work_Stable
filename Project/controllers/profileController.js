@@ -26,18 +26,13 @@ class ProfileController {
                 ],
                 raw: true
             });
-
-            res.render("./layouts/profile.hbs", { layout: "profile.hbs", courses: courses });
+ 
+            res.render("./layouts/profile.hbs", { layout: "profile.hbs", courses: courses, user:admin.Login, email:admin.Email   });
         } catch (error) {
             console.error('Ошибка при получении профиля:', error);
             res.status(500).send('Произошла ошибка при получении профиля');
         }
     }
-    //на этой странице надо реализовать переход на 
-    //заевршенные курсы и пройденные (просто 2 вкладки) если что пути до этого /profile/finished & /profile/inprocess
-    // просто это в ссылку
-
-
 
     async getFinishedCourses(req, res) {
         if (!req.session.userId) {
@@ -52,10 +47,16 @@ class ProfileController {
             req.session.previousUrl = req.headers.referer;
             return res.render('./layouts/error.hbs', { layout: "error.hbs", errorMessage: 'Нужен вход' });
         }
+
+        const status = await models.Status.findOne({
+            where: {
+                status_name: "finished"
+            }
+        });
             const coursesWithDetails = await models.Statistics.findAll({
                 where: {
                     user_id: req.session.userId,
-                    status_id: 5
+                    status_id: status.status_id
                 },
                 include: [
                     {
@@ -96,10 +97,16 @@ class ProfileController {
                 req.session.previousUrl = req.headers.referer;
                 return res.render('./layouts/error.hbs', { layout: "error.hbs", errorMessage: 'Нужен вход' });
             }
+
+            const status = await models.Status.findOne({
+                where: {
+                    status_name: "inproc"
+                }
+            });
             const coursesWithDetails = await models.Statistics.findAll({
                 where: {
                     user_id: req.session.userId,
-                    status_id: 6
+                    status_id: status.status_id
                 },
                 include: [
                     {
@@ -128,56 +135,59 @@ class ProfileController {
     }
 
     async getCourse(req, res) {
-        try {  if (!req.session.userId) {
+        try {
+            if (!req.session.userId) {
                 return res.render("./layouts/registration.hbs", { layout: "registration.hbs" });
             }
-
+    
             const admin = await models.Users.findByPk(req.session.userId);
-        if(admin && admin.Role == 1){
-            res.redirect('/admin');
-        }
-        if(!admin){
-            req.session.previousUrl = req.headers.referer;
-            return res.render('./layouts/error.hbs', { layout: "error.hbs", errorMessage: 'Нужен вход' });
-        }
-            const { courseId } = req.params;
-          
-            const videous = await models.Videos.findAll({ where: { course_id: courseId } });
-            if (videous.length < 1) {
-                req.session.previousUrl = req.headers.referer;
-                return res.render('./layouts/error.hbs', { layout: "error.hbs", errorMessage: 'Извиняемся, пока курс в доработке' });
+            if (admin && admin.Role == 1) {
+                res.redirect('/admin');
             }
-            const videosWithUrls = videous.map(video => {
-                const base64Video = video.video_content.toString('base64');
-                return {
-                    ...video,
-                    video_url: `data:video/mp4;base64,${base64Video}`
-                };
-            });
-
-            const tasksDetails = await models.Tasks.findAll({
+            if (!admin) {
+                req.session.previousUrl = req.headers.referer;
+                return res.render('./layouts/error.hbs', { layout: "error.hbs", errorMessage: 'Нужен вход' });
+            }
+    
+            const { courseId } = req.params;
+    
+            // Получаем курс и количество вопросов для показа
+            const course = await models.Courses.findByPk(courseId);
+            if (!course) {
+                req.session.previousUrl = req.headers.referer;
+                return res.render('./layouts/error.hbs', { layout: "error.hbs", errorMessage: 'Курс не найден' });
+            }
+    
+            const questionsToShow = course.questions_to_show;
+    
+            // Получаем все вопросы для курса
+            const allTasks = await models.Tasks.findAll({
                 where: { course_id: courseId },
                 include: { model: models.Answers }
             });
-
-            if (tasksDetails.length < 1) {
+    
+            if (allTasks.length < 1) {
                 req.session.previousUrl = req.headers.referer;
                 return res.render('./layouts/error.hbs', { layout: "error.hbs", errorMessage: 'Извиняемся, пока курс в доработке' });
             }
-
-            const tasks = tasksDetails.map(detail => {
-                return {
-                    test_id: detail.test_id,
-                    course_id: detail.course_id,
-                    question_text: detail.question_text,
-                    answers: detail.Answers.map(answer => ({
-                        answer_id: answer.answer_id,
-                        answer_text: answer.answer_text,
-                        is_correct: answer.is_correct
-                    }))
-                };
-            });
-            res.render("./layouts/exstensionCourse.hbs", { layout: "exstensionCourse.hbs", tasks: tasks, videous: videosWithUrls  });
+    
+            // Выбираем случайные вопросы
+            const selectedTasks = allTasks
+                .sort(() => Math.random() - 0.5) // Перемешиваем вопросы
+                .slice(0, questionsToShow); // Выбираем нужное количество
+    
+            const tasks = selectedTasks.map(task => ({
+                test_id: task.test_id,
+                course_id: task.course_id,
+                question_text: task.question_text,
+                answers: task.Answers.map(answer => ({
+                    answer_id: answer.answer_id,
+                    answer_text: answer.answer_text,
+                    is_correct: answer.is_correct
+                }))
+            }));
+    
+            res.render("./layouts/exstensionCourse.hbs", { layout: "exstensionCourse.hbs", tasks: tasks });
         } catch (error) {
             console.error('Ошибка при получении курсов в процессе:', error.message);
             res.status(500).send('Произошла ошибка при получении курсов в процессе');
@@ -205,7 +215,12 @@ class ProfileController {
                 req.session.previousUrl = req.headers.referer;
                 return res.render('./layouts/error.hbs', { layout: "error.hbs", errorMessage: 'Курс не найден' });    
             }
-            await course.update({ status_id: 5, end_date: new Date() });
+            const status = await models.Status.findOne({
+                where: {
+                    status_name: "finished"
+                }
+            });
+            await course.update({ status_id: status.status_id, end_date: new Date() });
 
             res.redirect('/profile');
         } catch (error) {

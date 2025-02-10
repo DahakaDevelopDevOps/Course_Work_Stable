@@ -22,7 +22,6 @@ exports.register = async (req, res, next) => {
         res.redirect('/login');
     } catch (error) {
         console.error('Error during registration:', error);
-        //по-хорошему надо присобачить общий обработчик ошибок
         res.status(500).send('Error during registration');
     }
 }

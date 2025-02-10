@@ -30,42 +30,53 @@ class AdminController {
     async getAdminPage(req, res) {
         try {
             await isAdmin(req, res, async () => {
-                const tasksDetails1 = await models.Tasks.findAll({
+                const { courseName } = req.query; // Получаем параметр фильтра
+                const tasksDetails = await models.Tasks.findAll({
                     include: [
                         {
                             model: models.Courses,
-                            attributes: ['course_name']
+                            where: courseName ? { course_name: courseName } : {} // Фильтр по названию курса
                         },
                         {
                             model: models.Answers
                         }
-                    ], raw: true
-                })
-                const tasksDetails = await models.Tasks.findAll({
-                    include: [{ model: models.Answers }]
+                    ]
                 });
-
+            
                 if (!tasksDetails) {
                     req.session.previousUrl = req.headers.referer;
-                    return res.render('./layouts/error.hbs', { layout: "error.hbs", errorMessage: 'нет теста' });
-
+                    return res.render('./layouts/error.hbs', { layout: "error.hbs", errorMessage: 'Нет теста' });
                 }
-
+            
+                // Маппинг данных
                 const tasks = tasksDetails.map(detail => {
                     return {
                         test_id: detail.test_id,
                         course_id: detail.course_id,
                         question_text: detail.question_text,
-                        answers: detail.Answers.map(answer => ({
+                        course: { // Добавляем информацию о курсе
+                            course_id: detail.Course.course_id,
+                            course_name: detail.Course.course_name,
+                            description: detail.Course.description,
+                            duration: detail.Course.duration,
+                            course_type_id: detail.Course.course_type_id,
+                            other_details: detail.Course.other_details
+                        },
+                        answers: detail.Answers.map(answer => ({ // Маппинг ответов
                             answer_id: answer.answer_id,
                             answer_text: answer.answer_text,
                             is_correct: answer.is_correct
                         }))
                     };
                 });
-
-
-                res.render("./layouts/admin.hbs", { layout: "admin.hbs", tests: tasks });
+                const courses = await models.Courses.findAll({
+                    attributes: ['course_id', 'course_name'],
+                    raw: true
+                });
+            
+            
+                // Отправляем данные в шаблон
+                res.render("./layouts/admin.hbs", { layout: "admin.hbs", tests: tasks, courses: courses });
             });
         } catch (error) {
             console.error('Ошибка при проверке роли администратора:', error);
@@ -111,17 +122,47 @@ class AdminController {
     async getVideos(req, res) {
         try {
             await isAdmin(req, res, async () => {
-                const courses = await models.Courses.findAll({ include: [models.CourseTypes], raw: true });
-                const videos = await models.Videos.findAll({ include: [models.Courses], raw: true })
-                // Преобразуем видео BLOB в base64
-                const videosWithUrls = videos.map(video => {
+                // Получаем курсы
+                const courses = await models.Courses.findAll({
+                    include: [models.CourseTypes],
+                    raw: true
+                });
+    
+                // Получаем видео с информацией о курсах
+                const videos = await models.Videos.findAll({
+                    include: [{ model: models.Courses }],
+                    raw: true
+                });
+    
+                // Преобразуем данные
+                const formattedVideos = videos.map(video => {
+                    // Преобразуем BLOB в base64 (если видео небольшое)
                     const base64Video = video.video_content.toString('base64');
+                    const videoUrl = `data:video/mp4;base64,${base64Video}`;
+    
+                    // Форматируем данные
                     return {
-                        ...video,
-                        video_url: `data:video/mp4;base64,${base64Video}`
+                        VideoId: video.video_id,
+                        CourseId: video.course_id,
+                        VideoDescription: video.video_description,
+                        VideoUrl: videoUrl,
+                        Course: {
+                            CourseId: video['Course.course_id'],
+                            CourseName: video['Course.course_name'],
+                            Description: video['Course.description'],
+                            Duration: video['Course.duration'],
+                            CourseTypeId: video['Course.course_type_id'],
+                            OtherDetails: video['Course.other_details']
+                        }
                     };
                 });
-                res.render("./layouts/videos.hbs", { layout: "videos.hbs", videos: videosWithUrls, courses: courses });
+    
+                // Отправляем данные в шаблон
+                res.render("./layouts/videos.hbs", {
+                    layout: "videos.hbs",
+                    videos: formattedVideos,
+                    courses: courses
+                });
             });
         } catch (error) {
             console.error('Ошибка при получении записей на курсы:', error);
@@ -196,27 +237,28 @@ class AdminController {
     async addCourse(req, res) {
         try {
             await isAdmin(req, res, async () => {
-                const { courseName, description, details, duration, courseType } = req.body;
-
+                const { courseName, description, details, duration, courseType, questionsToShow } = req.body;
+    
                 if (isNaN(duration)) {
                     req.session.previousUrl = req.headers.referer;
                     return res.render('./layouts/error.hbs', { layout: "error.hbs", errorMessage: 'Продолжительность должна быть числом' });
                 }
+    
                 const courseTypeExists = await models.CourseTypes.findByPk(courseType);
                 if (!courseTypeExists) {
-                    ;
                     req.session.previousUrl = req.headers.referer;
                     return res.render('./layouts/error.hbs', { layout: "error.hbs", errorMessage: 'Указанный тип курса не существует' });
-
                 }
+    
                 await models.Courses.create({
                     course_name: courseName,
                     description: description,
                     other_details: details,
                     duration: duration,
-                    course_type_id: courseType
+                    course_type_id: courseType,
+                    questions_to_show: questionsToShow || 10 // По умолчанию 10 вопросов
                 });
-
+    
                 res.redirect('/admin/courses');
             });
         } catch (error) {
@@ -262,44 +304,45 @@ class AdminController {
         try {
             await isAdmin(req, res, async () => {
                 const courseId = req.params.id;
-                const { courseName, description, details, duration, courseType } = req.body;
+                const { courseName, description, details, duration, courseType, questionsToShow } = req.body;
+    
                 if (duration <= 0 || duration >= 100) {
                     req.session.previousUrl = req.headers.referer;
                     return res.render('./layouts/error.hbs', { layout: "error.hbs", errorMessage: 'Продолжительность курса должна быть больше 0 и меньше 1000' });
                 }
-
+    
                 const existingCourse = await models.Courses.findOne({
                     where: {
                         course_name: courseName,
                         course_id: { [Op.not]: courseId }
                     }
                 });
-
+    
                 if (existingCourse) {
                     req.session.previousUrl = req.headers.referer;
                     return res.render('./layouts/error.hbs', { layout: "error.hbs", errorMessage: 'Курс с таким именем уже существует' });
                 }
-
+    
                 const updatedCourse = await models.Courses.update(
                     {
                         course_name: courseName,
                         description: description,
                         other_details: details,
                         duration: duration,
-                        course_type_id: courseType
+                        course_type_id: courseType,
+                        questions_to_show: questionsToShow || 10 // Обновляем количество вопросов
                     },
                     {
                         where: { course_id: courseId }
                     }
                 );
-
+    
                 if (updatedCourse[0] === 0) {
                     req.session.previousUrl = req.headers.referer;
                     return res.render('./layouts/error.hbs', { layout: "error.hbs", errorMessage: 'Курс не найден' });
                 }
-
+    
                 res.redirect('/admin/courses');
-
             });
         } catch (error) {
             console.error('Ошибка при обновлении курса:', error);
@@ -516,6 +559,7 @@ class AdminController {
                     video_content: videoData,
                     video_description: filename
                 });
+                console.log("Значение курса Id" + courseId)
 
                 return res.render('./layouts/infoAdmin.hbs', { layout: "infoAdmin.hbs", message: 'Видео успешно добавлено' });
             });

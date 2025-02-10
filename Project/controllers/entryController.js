@@ -70,11 +70,16 @@ async addEntry(req, res) {
             return res.status(400).send('Вы уже записаны на этот курс');
         }
 
+        const status = await models.Status.findOne({
+            where: {
+                status_name: "inproc"
+            }
+        });
         const newEntry = await models.Statistics.create({
             user_id: req.session.userId, 
             course_id: courseId,
             start_date: new Date(), 
-            status_id: 6, 
+            status_id: status.status_id 
         });
 
         // Отправляем сообщение пользователю о записи на курс

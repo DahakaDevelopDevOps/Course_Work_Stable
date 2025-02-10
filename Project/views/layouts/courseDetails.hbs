@@ -4,65 +4,115 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Course Details</title>
+    <title>Курс: {{course.course_name}}</title>
     <style>
-         body {
-        font-family: Arial, sans-serif;
-        margin: 0;
-        padding: 0;
-        background-color: #f0f0f0;
-    }
+        body {
+            font-family: Arial, sans-serif;
+            background-image: url('/background.png');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            min-height: 100vh;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
 
-    .container {
-        max-width: 800px;
-        margin: 20px auto;
-        padding: 20px;
-        background-color: #fff;
-        border-radius: 8px;
-        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    }
+        .container {
+            background-color: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+            animation: fadeIn 0.8s ease-in-out;
+            max-width: 800px;
+            width: 90%;
+            margin-top: 100px; /* Учитываем фиксированный хедер */
+            margin-bottom: 40px;
+        }
 
-    .course {
-        text-align: center;
-    }
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
 
-    .course h1 {
-        font-size: 2rem;
-        font-weight: bold;
-        margin-bottom: 1rem;
-    }
+        h1 {
+            color: #333;
+            font-size: 28px;
+            margin-bottom: 20px;
+        }
 
-    .course p {
-        font-size: 1.2rem;
-        margin-bottom: 1rem;
-    }
+        .course p {
+            font-size: 18px;
+            color: #444;
+            line-height: 1.6;
+            text-align: left;
+            margin-bottom: 15px;
+        }
 
-    button {
-        background-color: #4567b7;
-        color: #ffffff;
-        padding: 0.5rem 1rem;
-        border-radius: 4px;
-        border: none;
-        cursor: pointer;
-        margin-top: 1rem;
-    }
+        .course strong {
+            color: #222;
+        }
 
-    button:hover {
-        background-color: #334ccc;
-    }
+        .btn {
+            display: inline-block;
+            background-color: #007bff;
+            color: #fff;
+            text-decoration: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            transition: background-color 0.3s ease, transform 0.2s;
+            font-size: 16px;
+            border: none;
+            cursor: pointer;
+            margin-top: 20px;
+            width: 100%;
+            max-width: 300px;
+            text-align: center;
+        }
+
+        .btn:hover {
+            background-color: #0056b3;
+            transform: scale(1.05);
+        }
+
+        .back-link {
+            display: block;
+            margin-top: 20px;
+            font-size: 16px;
+            color: #007bff;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .back-link:hover {
+            color: #0056b3;
+        }
     </style>
 </head>
 
 <body>
+    {{> header}}
+
     <div class="container">
-        <h1>Course Details</h1>
+        <h1>{{course.course_name}}</h1>
+
         <div class="course">
-            {{> course}}
-            <p>Тип курса: {{type.type_name}}</p>
-            <button class="details-button" data-course-id="{{course_id}}">Записаться!</button>
+            <p><strong>Описание:</strong> {{course.description}}</p>
+            <p><strong>Тип курса:</strong> {{type.type_name}}</p>
+            <p><strong>Продолжительность:</strong> {{course.duration}} часов</p>
+
+            <button class="btn details-button" data-course-id="{{course.course_id}}">Записаться!</button>
         </div>
-        <a href="/courses">Назад</a>
-    </div>
+
+        <a href="/courses" class="back-link">← Назад к курсам</a>
     </div>
 
     <script>
@@ -72,7 +122,6 @@
             const newUrl = `/entry?courseId=${courseId}`;
             window.location.href = newUrl;
         });
-
     </script>
 </body>
 

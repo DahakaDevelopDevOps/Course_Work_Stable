@@ -22,6 +22,10 @@ module.exports = function(sequelize, DataTypes) {
       },
       other_details: {
         type: DataTypes.STRING(1000)
+      },
+      questions_to_show: {
+          type: DataTypes.INTEGER,
+          defaultValue: 10 // По умолчанию 10 вопросов
       }
     }, {
       sequelize,
