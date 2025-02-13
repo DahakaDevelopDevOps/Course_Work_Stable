@@ -5,56 +5,176 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Курсы</title>
-  <style>
-        #back-to-profile-link,
-        .updatestatus-button {
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-image: url('/background.png');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            padding-top: 80px;
+        }
+
+        #back-to-profile-link, #enroll-link, #continue-link {
             text-decoration: none;
-            color: #fff;
-            padding: 10px;
-            background-color: #007bff;
-            border: none;
-            border-radius: 5px;
+            padding: 12px 20px;
+            border-radius: 8px;
             display: inline-block;
-            margin-bottom: 20px;
-            cursor: pointer;
+            font-size: 18px;
+            font-weight: bold;
+            transition: all 0.3s ease-in-out;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            margin-top: 20px;
         }
 
-        .updatestatus-button {
+        #back-to-profile-link {
+            background-color: #007bff;
+            color: #fff;
+        }
+
+        #back-to-profile-link:hover {
+            background-color: #0056b3;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+            transform: translateY(-2px);
+        }
+
+        #enroll-link {
             background-color: #28a745;
+            color: #fff;
         }
 
-        .updatestatus-button:hover {
-            background-color: #1e7e34;
+        #enroll-link:hover {
+            background-color: #218838;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        #continue-link {
+            background-color: #ffc107;
+            color: #333;
+        }
+
+        #continue-link:hover {
+            background-color: #e0a800;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        #course-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            max-width: 1200px;
+            margin: 20px auto;
+            gap: 20px;
         }
 
         .course-card {
-            border: 1px solid #007bff;
-            margin: 10px;
-            padding: 10px;
+            background-color: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+            padding: 20px;
+            width: calc(33.333% - 20px);
+            transition: all 0.3s ease-in-out;
+            animation: fadeIn 0.8s ease-in-out;
+        }
+
+        .course-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+        }
+
+        .course-card h2 {
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 10px;
+            font-size: 22px;
+            color: #333;
+        }
+
+        .course-card p {
+            font-size: 16px;
+            color: #555;
+            margin-bottom: 10px;
+        }
+
+        .details-button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease-in-out;
+            margin-top: 10px;
+        }
+
+        .details-button:hover {
+            background-color: #0056b3;
+        }
+
+        #no-courses {
+            font-size: 20px;
+            color: #333;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+            margin-top: 50px;
+        }
+
+        @media (max-width: 768px) {
+            .course-card {
+                width: calc(50% - 20px);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .course-card {
+                width: 100%;
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
     </style>
 </head>
 
 <body>
-        {{> header}}
-
-    <a id="back-to-profile-link" href="/profile">Назад к профилю</a>
+    {{> header}}
     <div id="course-container">
         {{#if courses.length}}
             {{#each courses}}
-                <div class="course-card">
-                    <h2>{{course_name}}</h2>
-                    <p>{{description}}</p>
-                    <p>Продолжительность: {{duration}}</p>
-                    <p>Дата начала: {{start_date}}</p>
-                    <button class="details-button" data-course-id="{{course_id}}">Подробнее</button>
-                </div>
+            <div class="course-card">
+                <h2>{{course_name}}</h2>
+                <p>{{description}}</p>
+                <p>Продолжительность: {{duration}} часов</p>
+                <p>Дата начала: {{start_date}}</p>
+                <p>Дата окончания: {{end_date}}</p>
+                <button class="details-button" data-course-id="{{course_id}}">Подробнее</button>
+            </div>
             {{/each}}
         {{else}}
-            <p>Пока курсов нет.</p>
+            <div id="no-courses">
+                <p>У вас пока нет завершённых курсов.</p>
+                <a id="enroll-link" href="http://localhost:3000/courses">Записаться на курсы</a>
+                <a id="continue-link" href="http://localhost:3000/profile/inprocess">Продолжить обучение</a>
+            </div>
         {{/if}}
     </div>
-
+    <a id="back-to-profile-link" href="/profile">Назад к профилю</a>
     <script>
         document.querySelectorAll('.details-button').forEach(button => {
             button.addEventListener('click', () => {
@@ -63,7 +183,6 @@
             });
         });
     </script>
-
 </body>
 
 </html>

@@ -1,9 +1,51 @@
 <header>
     <nav>
-        <ul>
-            <li><a href="/profile/finished">Ваши завершенные курсы</a></li>
-            <li><a href="/profile/inprocess">Ваши курсы</a></li>
-            <li><a href="/auth/logout">Выход</a></li>
+        <ul class="nav-menu">
+            <li><a href="/profile/finished" class="nav-button">Ваши завершенные курсы</a></li>
+            <li><a href="/profile/inprocess" class="nav-button">Ваши курсы</a></li>
+            <li><a href="/auth/logout" class="nav-button logout">Выход</a></li>
         </ul>
     </nav>
 </header>
+
+<style>
+    .nav-menu {
+        list-style: none;
+        padding: 0;
+        margin: 20px 0;
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+    }
+
+    .nav-menu li {
+        display: inline;
+    }
+
+    .nav-button {
+        display: inline-block;
+        padding: 12px 20px;
+        font-size: 18px;
+        color: #fff;
+        background: #007bff;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: bold;
+        transition: all 0.3s ease-in-out;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    }
+
+    .nav-button:hover {
+        background: #0056b3;
+        box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+        transform: translateY(-2px);
+    }
+
+    .logout {
+        background: #dc3545;
+    }
+
+    .logout:hover {
+        background: #a71d2a;
+    }
+</style>

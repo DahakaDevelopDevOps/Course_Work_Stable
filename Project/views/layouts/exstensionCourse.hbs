@@ -141,7 +141,7 @@
                 {{/each}}
             </div>
             <button type="submit">Отправить ответы</button>
-            <button type="button" id="finishButton" class="hidden" data-course-id="{{this.course_id}}">Завершить</button>
+            <button type="button" id="finishButton" class="hidden" data-course-id="{{courseId}}">Завершить</button>
         </form>
     </div>
 
@@ -212,7 +212,7 @@
                     alert('Есть неверные ответы. Пожалуйста, проверьте и исправьте ошибки.');
                 }
             });
-
+            
             // Обработка нажатия кнопки "Завершить"
             finishButton.addEventListener('click', async function () {
                 const courseId = this.dataset.courseId;
