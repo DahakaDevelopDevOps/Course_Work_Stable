@@ -5,18 +5,100 @@
     <meta charset="UTF-8">
     <title>Manage Course Types</title>
     <style>
-        .card {
+        body {
+            font-family: Arial, sans-serif;
+            background-image: url('/background.png');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            min-height: 100vh;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        .container {
+            background-color: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+            animation: fadeIn 0.8s ease-in-out;
+            max-width: 800px;
+            width: 90%;
+            margin-top: 100px;
+            margin-bottom: 40px;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        h1, h2 {
+            color: #333;
+        }
+
+        input {
+            padding: 10px;
+            margin: 10px 0;
             border: 1px solid #ccc;
-            padding: 16px;
-            margin: 16px;
-            border-radius: 8px;
-            box-shadow: 2px 2px 12px #aaa;
+            border-radius: 5px;
+            font-size: 16px;
+            width: 100%;
+            max-width: 300px;
+        }
+
+        .course-types-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            justify-content: center;
+        }
+
+        .card {
+            background-color: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            padding: 20px;
+            text-align: left;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            min-height: 220px;
         }
 
         .card-actions {
             display: flex;
             justify-content: space-between;
-            margin-top: 12px;
+            margin-top: auto;
+        }
+
+        .btn {
+            display: inline-block;
+            background-color: #007bff;
+            color: #fff;
+            text-decoration: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            transition: background-color 0.3s ease, transform 0.2s;
+            font-size: 16px;
+            border: none;
+            cursor: pointer;
+            width: 100%;
+            text-align: center;
+        }
+
+        .btn:hover {
+            background-color: #0056b3;
+            transform: scale(1.05);
         }
 
         .edit-form {
@@ -28,118 +110,80 @@
 <body>
     {{> adminHeader}}
     <br>
-    {{> back}}
-    <h1>Manage Course Types</h1>
-    <h2>Add New Type</h2>
-    <form id="add-type-form" action="/admin/addType" method="post">
-        <label for="typeName">Type Name:</label>
-        <input type="text" id="typeName" name="typeName" required>
-        <label for="description">Description:</label>
-        <input type="text" id="description" name="description">
-        <label for="otherDetails">Other Details:</label>
-        <input type="text" id="otherDetails" name="otherDetails">
-        <button type="submit">Add Type</button>
-    </form>
 
-    <div id="course-types-container">
-        {{#each types}}
-        <div class="card" id="card-{{this.type_id}}">
-            <h2>{{this.type_name}}</h2>
-            <p>{{this.description}}</p>
-            <p>{{this.other_details}}</p>
-            <div class="card-actions">
-                <button onclick="showEditForm({{this.type_id}})">Edit</button>
-                <button class="delete-button" data-type-id="{{this.type_id}}">Удалить</button>
-            </div>
-            <div class="edit-form" id="edit-form-{{this.type_id}}">
-                <form onsubmit="updateType(event, {{this.type_id}})">
-                    <label for="edit-type-name-{{this.type_id}}">Type Name:</label>
-                    <input type="text" id="edit-type-name-{{this.type_id}}" name="type_name" value="{{this.type_name}}"
-                        required>
-                    <label for="edit-description-{{this.type_id}}">Description:</label>
-                    <input type="text" id="edit-description-{{this.type_id}}" name="description"
-                        value="{{this.description}}">
-                    <label for="edit-other-details-{{this.type_id}}">Other Details:</label>
-                    <input type="text" id="edit-other-details-{{this.type_id}}" name="other_details"
-                        value="{{this.other_details}}">
-                    <button type="submit">Update</button>
-                    <button type="button" onclick="hideEditForm({{this.type_id}})">Cancel</button>
-                </form>
-            </div>
+    <div class="container">
+        <h1>Manage Course Types</h1>
+        <h2>Add New Type</h2>
+        <form id="add-type-form" action="/admin/addType" method="post">
+            <input type="text" id="typeName" name="typeName" placeholder="Type Name" required>
+            <input type="text" id="description" name="description" placeholder="Description">
+            <input type="text" id="otherDetails" name="otherDetails" placeholder="Other Details">
+            <button type="submit" class="btn">Add Type</button>
+        </form>
 
+        <div id="course-types-container" class="course-types-grid">
+            {{#each types}}
+            <div class="card" id="card-{{this.type_id}}">
+                <h2>{{this.type_name}}</h2>
+                <p>{{this.description}}</p>
+                <p>{{this.other_details}}</p>
+                <div class="card-actions">
+                    <button class="btn" onclick="showEditForm({{this.type_id}})">Edit</button>
+                    <button class="btn delete-button" data-type-id="{{this.type_id}}">Удалить</button>
+                </div>
+                <div class="edit-form" id="edit-form-{{this.type_id}}">
+                    <form onsubmit="updateType(event, {{this.type_id}})">
+                        <input type="text" id="edit-type-name-{{this.type_id}}" name="type_name" value="{{this.type_name}}" required>
+                        <input type="text" id="edit-description-{{this.type_id}}" name="description" value="{{this.description}}">
+                        <input type="text" id="edit-other-details-{{this.type_id}}" name="other_details" value="{{this.other_details}}">
+                        <button type="submit" class="btn">Update</button>
+                        <button type="button" class="btn" onclick="hideEditForm({{this.type_id}})">Cancel</button>
+                    </form>
+                </div>
+            </div>
+            {{/each}}
         </div>
-        {{/each}}
     </div>
 
-     <script>
+    <script>
         async function updateType(event, typeId) {
             event.preventDefault();
-
             const typeName = document.getElementById(`edit-type-name-${typeId}`).value;
             const description = document.getElementById(`edit-description-${typeId}`).value;
             const otherDetails = document.getElementById(`edit-other-details-${typeId}`).value;
-
-            console.log('Updating type with data:', { type_name: typeName, description, other_details: otherDetails });
-
             try {
                 const response = await fetch(`/admin/editType/${typeId}`, {
                     method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ type_name: typeName, description: description, other_details: otherDetails })
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ type_name: typeName, description, other_details: otherDetails })
                 });
-
-                if (!response.ok) {
-                    throw new Error('Failed to update type');
-                }
-
+                if (!response.ok) throw new Error('Failed to update type');
                 alert('Type updated successfully');
                 location.reload();
             } catch (error) {
-                console.error('Error updating type:', error);
                 alert('Error updating type');
             }
         }
-        
 
         document.addEventListener('DOMContentLoaded', () => {
-            document.querySelectorAll('.edit-form form').forEach(form => {
-                form.addEventListener('submit', event => {
-                    const typeId = form.closest('.card').getAttribute('id').split('-')[1];
-                    updateType(event, typeId);
-                });
-            });
-
             document.querySelectorAll('.delete-button').forEach(button => {
                 button.addEventListener('click', async () => {
                     const typeId = button.dataset.typeId;
-                    try {
-                        if (confirm('Вы уверены, что хотите удалить этот тип?')) {
-                            const response = await fetch(`/admin/deleteType/${typeId}`, {
-                                method: 'DELETE'
-                            });
-                            if (response.ok) {
-                                window.location.reload();
-                            } else {
-                                console.error('Ошибка при удалении типа');
-                            }
-                        }
-                    } catch (error) {
-                        console.error('Ошибка при удалении типа:', error);
+                    if (confirm('Вы уверены, что хотите удалить этот тип?')) {
+                        const response = await fetch(`/admin/deleteType/${typeId}`, { method: 'DELETE' });
+                        if (response.ok) location.reload();
                     }
                 });
             });
         });
 
-        window.showEditForm = (typeId) => {
+        function showEditForm(typeId) {
             document.getElementById(`edit-form-${typeId}`).style.display = 'block';
-        };
+        }
 
-        window.hideEditForm = (typeId) => {
+        function hideEditForm(typeId) {
             document.getElementById(`edit-form-${typeId}`).style.display = 'none';
-        };
+        }
     </script>
 </body>
-
 </html>

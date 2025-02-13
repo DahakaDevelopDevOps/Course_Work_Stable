@@ -87,7 +87,7 @@ async register(req, res) {
         Login: username,
         Email: email,
         Password: hashedPassword,
-        Role: 0
+        Role: 1
     });       
     res.redirect('/auth/login');
 }

@@ -4,91 +4,132 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Add Course</title>
+    <title>Добавить курс</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: #f2f2f2;
+            background-image: url('/profile background.png');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            min-height: 100vh;
             margin: 0;
-            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
         }
+
+        .container {
+            background-color: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+            animation: fadeIn 0.8s ease-in-out;
+            max-width: 600px;
+            width: 90%;
+            margin-top: 100px;
+            margin-bottom: 40px;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
         h1 {
             color: #333;
-            text-align: center;
-            margin-top: 20px;
+            font-size: 28px;
         }
-        form {
-            max-width: 600px;
-            margin: 20px auto;
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
+
         label {
             display: block;
-            margin-bottom: 10px;
+            margin-top: 10px;
             font-weight: bold;
+            text-align: left;
         }
-        input[type="text"],
-        textarea,
-        select {
-            width: calc(100% - 22px);
-            padding: 8px;
+
+        input, textarea, select {
+            width: calc(100% - 20px);
+            padding: 10px;
+            margin-top: 5px;
             border: 1px solid #ccc;
-            border-radius: 4px;
-            margin-bottom: 15px;
-        }
-        input[type="text"]:focus,
-        textarea:focus,
-        select:focus {
-            outline: none;
-            border-color: #007bff;
-        }
-        button[type="submit"] {
-            background-color: #007bff;
-            color: #fff;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 4px;
-            cursor: pointer;
+            border-radius: 5px;
             font-size: 16px;
         }
-        button[type="submit"]:hover {
+
+        button {
+            display: inline-block;
+            background-color: #007bff;
+            color: #fff;
+            text-decoration: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            transition: background-color 0.3s ease, transform 0.2s;
+            font-size: 16px;
+            border: none;
+            cursor: pointer;
+            width: 100%;
+            text-align: center;
+            margin-top: 15px;
+        }
+
+        button:hover {
             background-color: #0056b3;
+            transform: scale(1.05);
+        }
+
+        .back-link {
+            margin-top: 20px;
+            display: inline-block;
+            color: #007bff;
+            text-decoration: none;
+            font-size: 16px;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
         }
     </style>
 </head>
 
 <body>
-    <a href="/admin/courses" style="display: block; margin-bottom: 20px; text-align: center;">Назад</a>
-    <h1>Add Course</h1>
-    <form action="/admin/addcourse" method="POST">
-        <label for="courseName">Название курса:</label>
-        <input type="text" id="courseName" name="courseName" required>
-        <br>
-        <label for="description">Описание:</label>
-        <textarea id="description" name="description" required></textarea>
-        <br>
-        <label for="details">Навыки:</label>
-        <textarea id="details" name="details" required></textarea>
-        <br>
-        <label for="duration">Продолжительность:</label>
-        <input type="text" id="duration" name="duration" required pattern="^(0\.\d{1,2}[1-9]\d{0,2}|[1-9]\d{0,2}(\.\d{1,2})?|1000(\.0{1,2})?)$" title="Введите время в формате с плавающей точкой">
-        <br>
-        <label for="courseType">Тип курса:</label>
-        <select id="courseType" name="courseType" required>
-            <option value="" disabled selected>Выберите тип курса</option>
-            {{#each types}}
-            <option value="{{this.type_id}}">{{this.type_name}}</option>
-            {{/each}}
-        </select>
-        <br>
-        <button type="submit">Добавить</button>
-        <label for="questionsToShow">Количество вопросов в тесте:</label>
-        <input type="number" id="questionsToShow" name="questionsToShow" min="1" max="100" value="10" required>
-    </form>
+    {{> adminHeader}}
+    <div class="container">
+        <h1>Добавить курс</h1>
+        <form action="/admin/addcourse" method="POST">
+            <label for="courseName">Название курса:</label>
+            <input type="text" id="courseName" name="courseName" required>
+
+            <label for="description">Описание:</label>
+            <textarea id="description" name="description" required></textarea>
+
+            <label for="details">Навыки:</label>
+            <textarea id="details" name="details" required></textarea>
+
+            <label for="duration">Продолжительность:</label>
+            <input type="text" id="duration" name="duration" required pattern="^(0\.\d{1,2}[1-9]\d{0,2}|[1-9]\d{0,2}(\.\d{1,2})?|1000(\.0{1,2})?)$" title="Введите время в формате с плавающей точкой">
+
+            <label for="courseType">Тип курса:</label>
+            <select id="courseType" name="courseType" required>
+                <option value="" disabled selected>Выберите тип курса</option>
+                {{#each types}}
+                <option value="{{this.type_id}}">{{this.type_name}}</option>
+                {{/each}}
+            </select>
+            
+            <label for="questionsToShow">Количество вопросов в тесте:</label>
+            <input type="number" id="questionsToShow" name="questionsToShow" min="1" max="100" value="10" required>
+            
+            <button type="submit">Добавить</button>
+        </form>
+    </div>
 </body>
 
 </html>
-

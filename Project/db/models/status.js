@@ -6,7 +6,7 @@ module.exports = function(sequelize, DataTypes) {
         autoIncrement: true
       },
       status_name: {
-        type: DataTypes.STRING(90), // пройден, в процессе, недоступен, доступен
+        type: DataTypes.STRING(150), // пройден, в процессе, недоступен, доступен
         allowNull: false
       }
     }, {

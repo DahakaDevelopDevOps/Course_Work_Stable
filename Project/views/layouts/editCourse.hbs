@@ -5,101 +5,119 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Edit Course</title>
     <style>
-        .back-button {
-            background-color: #4567b7;
-            color: #ffffff;
-            padding: 0.5rem 1rem;
-            border-radius: 4px;
-            text-decoration: none;
-            display: inline-block;
-            margin-right: 10px;
+        body {
+            font-family: Arial, sans-serif;
+            background-image: url('/background.png');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            min-height: 100vh;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        .container {
+            background-color: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+            animation: fadeIn 0.8s ease-in-out;
+            max-width: 800px;
+            width: 90%;
+            margin-top: 100px;
+            margin-bottom: 40px;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         h1 {
-            font-size: 2rem;
-            font-weight: bold;
-            color: #4567b7;
-            margin-bottom: 1rem;
-        }
-
-        form {
-            display: flex;
-            flex-direction: column;
-            width: 100%;
+            color: #007bff;
+            font-size: 28px;
         }
 
         label {
-            font-size: 1.2rem;
+            display: block;
+            margin: 10px 0 5px;
             font-weight: bold;
-            margin-bottom: 0.5rem;
+            text-align: left;
         }
 
         input[type="text"],
         input[type="date"],
+        input[type="number"],
         textarea,
         select {
-            font-size: 1rem;
-            padding: 0.5rem;
-            border-radius: 4px;
-            border: 1px solid #ccc;
-            margin-bottom: 1rem;
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            font-size: 16px;
         }
 
-        button[type="submit"] {
-            background-color: #4567b7;
-            color: #ffffff;
-            padding: 0.5rem 1rem;
-            border-radius: 4px;
+        .button {
+            padding: 12px 24px;
+            background-color: #007bff;
+            color: white;
             border: none;
+            border-radius: 5px;
             cursor: pointer;
-            margin-top: 1rem;
+            transition: background-color 0.3s ease, transform 0.2s;
+            text-decoration: none;
+            font-size: 16px;
+            margin-top: 10px;
         }
 
-        button[type="submit"]:hover {
-            background-color: #334ccc;
+        .button:hover {
+            background-color: #0056b3;
+            transform: scale(1.05);
         }
     </style>
 </head>
 <body>
     {{> adminHeader}}
-    <a href="/admin" class="back-button">Вернуться к главной панели</a>
-    <a href="/admin/courses" class="back-button">Назад</a>
-    <h1>Edit Course</h1>
-    <form action="/admin/updatecourse/{{course.course_id}}" method="POST">
-        <label for="courseName">Название курса:</label>
-        <input type="text" id="courseName" name="courseName" value="{{course.course_name}}">
-        <br>
-        <label for="description">Описание:</label>
-        <textarea id="description" name="description">{{course.description}}</textarea>
-        <br>
-        <label for="details">Навыки:</label>
-        <textarea id="details" name="details">{{course.other_details}}</textarea>
-        <br>
-        <label for="duration">Продолжительность в часах:</label>
-        <input type="text" id="duration" name="duration" value="{{course.duration}}">
-        <label for="questionsToShow">Количество вопросов в тесте:</label>
-        <input type="number" id="questionsToShow" name="questionsToShow" min="1" max="100" value="{{course.questions_to_show}}" required>
-        <br>
+    <div class="container">
+        <h1>Edit Course</h1>
+        <a href="/admin" class="button">Вернуться к главной панели</a>
+        <a href="/admin/courses" class="button">Назад</a>
+        <form action="/admin/updatecourse/{{course.course_id}}" method="POST">
+            <label for="courseName">Название курса:</label>
+            <input type="text" id="courseName" name="courseName" value="{{course.course_name}}">
 
-        <select id="courseType" name="courseType">
-            <option value="{{course.course_type_id}}">{{type.type_name}}</option>
-            {{#each types}}
-            <option value="{{this.type_id}}">{{this.type_name}}</option>
-            {{/each}}
-        </select>
+            <label for="description">Описание:</label>
+            <textarea id="description" name="description">{{course.description}}</textarea>
 
+            <label for="details">Навыки:</label>
+            <textarea id="details" name="details">{{course.other_details}}</textarea>
 
-        <button type="submit">Изменить</button>
-    </form>
+            <label for="duration">Продолжительность в часах:</label>
+            <input type="text" id="duration" name="duration" value="{{course.duration}}">
 
-    <script>
-        function formatDate(timeString) {
-            const date = new Date(timeString);
-            const hours = String(date.getHours()).padStart(2, '0');
-            const minutes = String(date.getMinutes()).padStart(2, '0');
-            const seconds = String(date.getSeconds()).padStart(2, '0');
-            return `${hours}:${minutes}:${seconds}`;
-        }
-    </script>
+            <label for="questionsToShow">Количество вопросов в тесте:</label>
+            <input type="number" id="questionsToShow" name="questionsToShow" min="1" max="100" value="{{course.questions_to_show}}" required>
+
+            <label for="courseType">Тип курса:</label>
+            <select id="courseType" name="courseType">
+                <option value="{{course.course_type_id}}">{{type.type_name}}</option>
+                {{#each types}}
+                <option value="{{this.type_id}}">{{this.type_name}}</option>
+                {{/each}}
+            </select>
+
+            <button type="submit" class="button">Изменить</button>
+        </form>
+    </div>
 </body>
 </html>

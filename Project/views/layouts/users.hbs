@@ -4,67 +4,126 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Курсы</title>
+    <title>Пользователи</title>
     <style>
-        /* Стили для карточек пользователей */
+        body {
+            font-family: Arial, sans-serif;
+            background-image: url('/background.png');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            min-height: 100vh;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        .container {
+            background-color: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+            animation: fadeIn 0.8s ease-in-out;
+            max-width: 900px;
+            width: 90%;
+            margin-top: 50px;
+            margin-bottom: 40px;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        h1 {
+            color: #333;
+            font-size: 28px;
+        }
+
+        #user-container {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin-top: 20px;
+        }
+
         .user-card {
-            background-color: #f9f9f9;
-            /* Цвет фона */
-            border: 1px solid #ddd;
-            /* Граница */
-            border-radius: 8px;
-            /* Скругленные углы */
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            /* Тень */
+            background-color: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
             padding: 20px;
-            /* Отступ внутри карточки */
-            margin: 10px;
-            /* Внешний отступ */
-            max-width: 400px;
-            /* Максимальная ширина */
-            overflow: hidden;
-            /* Предотвращение переполнения содержимого */
+            text-align: left;
+            transition: transform 0.2s ease-in-out;
+        }
+
+        .user-card:hover {
+            transform: scale(1.03);
         }
 
         .user-card h2 {
-            margin-top: 0;
-            /* Убираем верхний отступ у заголовка */
+            font-size: 22px;
+            color: #333;
             margin-bottom: 10px;
-            /* Отступ между заголовком и остальным содержимым */
         }
 
         .user-card p {
-            margin: 5px 0;
-            /* Отступы для параграфов */
+            color: #666;
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+
+        .button-container {
+            text-align: right;
+        }
+
+        .delete-button {
+            background-color: #dc3545;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .delete-button:hover {
+            background-color: #c82333;
         }
     </style>
 </head>
 
 <body>
     {{> adminHeader}}
-    {{> back}}
-    <div id="course-container">
-
-        {{#each users}}
-        <div class="user-card">
-            <h2>{{this.Login}}</h2>
-            <p>ID: {{this.ID}}</p>
-            <p>Email: {{this.Email}}</p>
-                    <div class="button-container">
-            <button class="delete-button" data-user-id="{{this.ID}}">Удалить</button>
-
-        </div> 
+    <div class="container">
+        <h1>Список пользователей</h1>
+        <div id="user-container">
+            {{#each users}}
+            <div class="user-card">
+                <h2>{{this.Login}}</h2>
+                <p><strong>ID:</strong> {{this.ID}}</p>
+                <p><strong>Email:</strong> {{this.Email}}</p>
+                <div class="button-container">
+                    <button class="delete-button" data-user-id="{{this.ID}}">Удалить</button>
+                </div>
+            </div>
+            {{/each}}
         </div>
-        {{/each}}
     </div>
 
     <script>
         document.querySelectorAll('.delete-button').forEach(button => {
             button.addEventListener('click', async () => {
-
                 const userId = button.dataset.userId;
                 try {
-                    if (confirm('Вы уверены, что хотите удалить этого пользоватя?')) {
+                    if (confirm('Вы уверены, что хотите удалить этого пользователя?')) {
                         const response = await fetch(`/admin/deleteUser/${userId}`, {
                             method: 'DELETE'
                         });
@@ -80,7 +139,6 @@
             });
         });
     </script>
-
 </body>
 
 </html>

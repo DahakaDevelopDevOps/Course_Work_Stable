@@ -6,7 +6,7 @@ module.exports = function(sequelize, DataTypes) {
         autoIncrement: true
       },
       Login: {
-        type: DataTypes.STRING(50),
+        type: DataTypes.STRING(1000),
         allowNull: false
       },
       Role: {
@@ -17,7 +17,7 @@ module.exports = function(sequelize, DataTypes) {
         allowNull: false
       },
       Email: {
-        type: DataTypes.STRING(50),
+        type: DataTypes.STRING(1000),
         allowNull: false
       }
     }, {

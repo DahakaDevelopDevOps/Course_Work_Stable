@@ -6,7 +6,7 @@ module.exports = function(sequelize, DataTypes) {
         autoIncrement: true
       },
       type_name: {
-        type: DataTypes.STRING(50),
+        type: DataTypes.STRING(1000),
         allowNull: false
       },
       description: {

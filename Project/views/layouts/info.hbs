@@ -4,47 +4,78 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Information Page</title>
-        <style>
+    <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
+            background-image: url('/profile background.png');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            min-height: 100vh;
             margin: 0;
-            padding: 0;
-        }
-        .container {
-            max-width: 600px;
-            margin: 50px auto;
-            padding: 20px;
-            background-color: #fff;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
-        h1 {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
             text-align: center;
-            color: #333;
         }
+
+        .container {
+            background-color: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+            animation: fadeIn 0.8s ease-in-out;
+            max-width: 600px;
+            width: 90%;
+            margin-top: 100px;
+            margin-bottom: 40px;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        h1 {
+            color: #007bff;
+            font-size: 28px;
+        }
+
         p {
-            text-align: justify;
-            color: #666;
+            color: #333;
+            font-size: 18px;
             line-height: 1.6;
         }
+
         .go-back-link {
-            display: block;
-            text-align: center;
-            margin-top: 20px;
-            color: #007bff;
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border-radius: 5px;
             text-decoration: none;
+            transition: background-color 0.3s ease, transform 0.2s;
+            font-size: 16px;
+            margin-top: 20px;
         }
+
         .go-back-link:hover {
-            text-decoration: underline;
+            background-color: #0056b3;
+            transform: scale(1.05);
         }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>Информационная страница</h1>
-        <p style="text-align: center;">{{message}}</p>
-        <a href="/" class="go-back-link">Назад к главное странице</a>
+        <p>{{message}}</p>
+        <a href="/" class="go-back-link">Назад к главной странице</a>
     </div>
 </body>
 </html>
