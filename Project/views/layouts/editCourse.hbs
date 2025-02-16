@@ -105,6 +105,12 @@
             <label for="duration">Продолжительность в часах:</label>
             <input type="text" id="duration" name="duration" value="{{course.duration}}">
 
+            <label for="pass_threshold">Порог прохождения курса в (%):</label>
+            <input type="number" id="pass_threshold" name="pass_threshold" value="{{course.pass_threshold}}"  min="0" max="100"  required oninput="validatePassThreshold(this)"
+>
+            <label for="duration">На сколько дней становится недоступным:</label>
+            <input type="text" id="lock_days" name="lock_days" required min="1" max="7" value="{{course.lock_days}}"  title="Введите число от 1 до 7">
+
             <label for="questionsToShow">Количество вопросов в тесте:</label>
             <input type="number" id="questionsToShow" name="questionsToShow" min="1" max="100" value="{{course.questions_to_show}}" required>
 
@@ -120,4 +126,14 @@
         </form>
     </div>
 </body>
+<script>
+    function validatePassThreshold(input) {
+    const value = parseInt(input.value, 10);
+    if (isNaN(value) || value < 0 || value > 100) {
+        input.setCustomValidity('Значение должно быть от 0 до 100');
+    } else {
+        input.setCustomValidity('');
+    }
+}
+</script>
 </html>

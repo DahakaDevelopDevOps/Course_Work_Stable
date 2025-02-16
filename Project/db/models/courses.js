@@ -26,7 +26,15 @@ module.exports = function(sequelize, DataTypes) {
       questions_to_show: {
           type: DataTypes.INTEGER,
           defaultValue: 10 // По умолчанию 10 вопросов
-      }
+      },
+      pass_threshold: {
+          type: DataTypes.INTEGER,
+          allowNull: false
+      },
+      lock_days: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+      },
     }, {
       sequelize,
       tableName: 'Courses',

@@ -17,11 +17,11 @@ async function isAdmin(req, res, next) {
             next(); // Продолжаем выполнение следующего middleware'а или обработчика маршрута
         } else {
             req.session.previousUrl = req.headers.referer;
-            return res.render('./layouts/error.hbs', { layout: "error.hbs", errorMessage: 'Ты не админ!!!' });
+            return res.status(400).render('./layouts/error.hbs', { layout: "error.hbs", errorMessage: 'Ты не админ!!!' });
         }
     } else {
         req.session.previousUrl = req.headers.referer;
-        return res.render('./layouts/error.hbs', { layout: "error.hbs", errorMessage: 'Не зарегистрирован' });
+        return res.status(401).render('./layouts/error.hbs', { layout: "error.hbs", errorMessage: 'Не зарегистрирован' });
     }
 }
 
@@ -45,7 +45,7 @@ class AdminController {
             
                 if (!tasksDetails) {
                     req.session.previousUrl = req.headers.referer;
-                    return res.render('./layouts/error.hbs', { layout: "error.hbs", errorMessage: 'Нет теста' });
+                    return res.status(404).render('./layouts/error.hbs', { layout: "error.hbs", errorMessage: 'Нет теста' });
                 }
             
                 // Маппинг данных
@@ -76,7 +76,7 @@ class AdminController {
             
             
                 // Отправляем данные в шаблон
-                res.render("./layouts/admin.hbs", { layout: "admin.hbs", tests: tasks, courses: courses });
+                res.status(200).render("./layouts/admin.hbs", { layout: "admin.hbs", tests: tasks, courses: courses });
             });
         } catch (error) {
             console.error('Ошибка при проверке роли администратора:', error);
@@ -88,7 +88,7 @@ class AdminController {
         try {
             await isAdmin(req, res, async () => {
                 const users = await models.Users.findAll({ raw: true });
-                res.render("./layouts/users.hbs", { layout: "users.hbs", users: users });
+                res.status(200).render("./layouts/users.hbs", { layout: "users.hbs", users: users });
             });
         } catch (error) {
             console.error('Ошибка при получении пользователей:', error);
@@ -100,7 +100,29 @@ class AdminController {
         try {
             await isAdmin(req, res, async () => {
                 const types = await models.CourseTypes.findAll({ raw: true });
-                res.render("./layouts/types.hbs", { layout: "types.hbs", types: types });
+                res.status(200).render("./layouts/types.hbs", { layout: "types.hbs", types: types });
+            });
+        } catch (error) {
+            console.error('Ошибка при получении расписания:', error);
+            res.status(500).send('Произошла ошибка при получении расписания');
+        }
+    }
+
+    // материал
+    async getMaterial(req, res) {
+        try {
+            await isAdmin(req, res, async () => {
+
+                const material = await models.Materials.findByPk(req.params.id, {
+                    include: [{
+                        model: models.Courses,
+                        attributes: ['course_name']
+                    }]
+                });
+                if (!material) {
+                    return res.status(404).json({ error: 'Глава не найдена' });
+                }
+                res.json(material);
             });
         } catch (error) {
             console.error('Ошибка при получении расписания:', error);
@@ -112,7 +134,7 @@ class AdminController {
         try {
             await isAdmin(req, res, async () => {
                 const courses = await models.Courses.findAll({ include: [models.CourseTypes], raw: true });
-                res.render("./layouts/courseUpdating.hbs", { layout: "courseUpdating.hbs", courses: courses });
+                res.status(200).render("./layouts/courseUpdating.hbs", { layout: "courseUpdating.hbs", courses: courses });
             });
         } catch (error) {
             console.error('Ошибка при получении записей на курсы:', error);
@@ -158,7 +180,7 @@ class AdminController {
                 });
     
                 // Отправляем данные в шаблон
-                res.render("./layouts/videos.hbs", {
+                res.status(200).render("./layouts/videos.hbs", {
                     layout: "videos.hbs",
                     videos: formattedVideos,
                     courses: courses
@@ -173,7 +195,7 @@ class AdminController {
         try {
             await isAdmin(req, res, async () => {
                 const courses = await models.Courses.findAll({ include: [models.CourseTypes], raw: true });
-                res.render("./layouts/tests.hbs", { layout: "tests.hbs", courses: courses });
+                res.status(200).render("./layouts/tests.hbs", { layout: "tests.hbs", courses: courses });
             });
         } catch (error) {
             console.error('Ошибка при получении записей на курсы:', error);
@@ -189,14 +211,14 @@ class AdminController {
                 const type = await models.types.findByPk(id);
                 if (!type) {
                     req.session.previousUrl = req.headers.referer;
-                    return res.render('./layouts/error.hbs', { layout: "error.hbs", errorMessage: 'Тип не найден' });
+                    return res.status(400).render('./layouts/error.hbs', { layout: "error.hbs", errorMessage: 'Тип не найден' });
                 }
                 await type.update({
                     type_name: type_name,
                     description: description,
                     other_details: other_details
                 });
-                res.send('Информация о типе успешно обновлена');
+                res.status(200).send('Информация о типе успешно обновлена');
             });
         } catch (error) {
             console.error('Ошибка при обновлении типа:', error);
@@ -211,10 +233,10 @@ class AdminController {
                 const type = await models.types.findByPk(id);
                 if (!type) {
                     req.session.previousUrl = req.headers.referer;
-                    return res.render('./layouts/error.hbs', { layout: "error.hbs", errorMessage: 'Тип не найден' });
+                    return res.status(400).render('./layouts/error.hbs', { layout: "error.hbs", errorMessage: 'Тип не найден' });
                 }
                 await type.destroy();
-                res.send('Тип успешно удален');
+                res.status(200).send('Тип успешно удален');
             });
         } catch (error) {
             console.error('Ошибка при удалении типа:', error);
@@ -226,7 +248,7 @@ class AdminController {
         try {
             await isAdmin(req, res, async () => {
                 const types = await models.CourseTypes.findAll({ raw: true });
-                res.render("./layouts/addcourse.hbs", { layout: "addcourse.hbs", types: types });
+                res.status(200).render("./layouts/addcourse.hbs", { layout: "addcourse.hbs", types: types });
             });
         } catch (error) {
             console.error('Ошибка при добавлении класса:', error);
@@ -237,17 +259,64 @@ class AdminController {
     async addCourse(req, res) {
         try {
             await isAdmin(req, res, async () => {
-                const { courseName, description, details, duration, courseType, questionsToShow } = req.body;
+                const { courseName, description, details, duration, courseType, questionsToShow, pass_threshold, lock_days } = req.body;
     
+                // Проверка обязательных полей
+                if (!courseName || !description || !pass_threshold || !lock_days) {
+                    req.session.previousUrl = req.headers.referer;
+                    return res.status(400).render('./layouts/error.hbs', {
+                        layout: "error.hbs",
+                        errorMessage: 'Не все обязательные поля заполнены'
+                    });
+                }
+    
+                // Проверка, что duration является числом
                 if (isNaN(duration)) {
                     req.session.previousUrl = req.headers.referer;
-                    return res.render('./layouts/error.hbs', { layout: "error.hbs", errorMessage: 'Продолжительность должна быть числом' });
+                    return res.status(400).render('./layouts/error.hbs', {
+                        layout: "error.hbs",
+                        errorMessage: 'Продолжительность должна быть числом'
+                    });
+                }
+
+
+                if (isNaN(lock_days) || lock_days < 0 || lock_days > 7) {
+                    req.session.previousUrl = req.headers.referer;
+                    return res.status(400).render('./layouts/error.hbs', {
+                        layout: "error.hbs",
+                        errorMessage: 'Время блокировки должно быть числом от 0 до 7'
+                    });
+                }
+    
+                // Проверка, что pass_threshold находится в диапазоне от 0 до 100
+                const passThreshold = parseFloat(pass_threshold);
+                if (isNaN(passThreshold) || passThreshold < 0 || passThreshold > 100) {
+                    req.session.previousUrl = req.headers.referer;
+                    return res.status(400).render('./layouts/error.hbs', {
+                        layout: "error.hbs",
+                        errorMessage: 'Порог прохождения должен быть числом от 0 до 100'
+                    });
                 }
     
                 const courseTypeExists = await models.CourseTypes.findByPk(courseType);
                 if (!courseTypeExists) {
                     req.session.previousUrl = req.headers.referer;
-                    return res.render('./layouts/error.hbs', { layout: "error.hbs", errorMessage: 'Указанный тип курса не существует' });
+                    return res.status(400).render('./layouts/error.hbs', {
+                        layout: "error.hbs",
+                        errorMessage: 'Указанный тип курса не существует'
+                    });
+                }
+    
+                const existingCourse = await models.Courses.findOne({
+                    where: { course_name: courseName }
+                });
+    
+                if (existingCourse) {
+                    req.session.previousUrl = req.headers.referer;
+                    return res.status(400).render('./layouts/error.hbs', {
+                        layout: "error.hbs",
+                        errorMessage: 'Курс с таким именем уже существует'
+                    });
                 }
     
                 await models.Courses.create({
@@ -256,14 +325,30 @@ class AdminController {
                     other_details: details,
                     duration: duration,
                     course_type_id: courseType,
+                    pass_threshold: passThreshold,
+                    lock_days: lock_days,
                     questions_to_show: questionsToShow || 10 // По умолчанию 10 вопросов
                 });
     
-                res.redirect('/admin/courses');
+                res.status(204).redirect('/admin/courses');
             });
         } catch (error) {
             console.error('Ошибка при добавлении курса:', error);
-            res.status(500).send('Произошла ошибка при добавлении курса');
+    
+            // Обработка ошибок базы данных
+            if (error.name === 'SequelizeUniqueConstraintError') {
+                req.session.previousUrl = req.headers.referer;
+                return res.status(400).render('./layouts/error.hbs', {
+                    layout: "error.hbs",
+                    errorMessage: 'Курс с таким именем уже существует'
+                });
+            }
+    
+            // Общая ошибка сервера
+            res.status(500).render('./layouts/error.hbs', {
+                layout: "error.hbs",
+                errorMessage: 'Произошла ошибка при добавлении курса'
+            });
         }
     }
 
@@ -275,7 +360,7 @@ class AdminController {
                 const course = await models.Courses.findByPk(courseId, { include: [models.CourseTypes], raw: true });
                 if (!course) {
                     req.session.previousUrl = req.headers.referer;
-                    return res.render('./layouts/error.hbs', { layout: "error.hbs", errorMessage: 'Курс не найден' });
+                    return res.status(400).render('./layouts/error.hbs', { layout: "error.hbs", errorMessage: 'Курс не найден' });
                 }
                 const typeId = course.course_type_id;
                 const type = await models.CourseTypes.findByPk(typeId, { raw: true });
@@ -304,12 +389,44 @@ class AdminController {
         try {
             await isAdmin(req, res, async () => {
                 const courseId = req.params.id;
-                const { courseName, description, details, duration, courseType, questionsToShow } = req.body;
+                const { courseName, description, details, duration, courseType, questionsToShow, pass_threshold, lock_days } = req.body;
     
-                if (duration <= 0 || duration >= 100) {
-                    req.session.previousUrl = req.headers.referer;
-                    return res.render('./layouts/error.hbs', { layout: "error.hbs", errorMessage: 'Продолжительность курса должна быть больше 0 и меньше 1000' });
-                }
+  // Проверка обязательных полей
+  if (!courseName || !description || !pass_threshold || !lock_days) {
+    req.session.previousUrl = req.headers.referer;
+    return res.status(400).render('./layouts/error.hbs', {
+        layout: "error.hbs",
+        errorMessage: 'Не все обязательные поля заполнены'
+    });
+}
+
+// Проверка, что duration является числом
+if (isNaN(duration)) {
+    req.session.previousUrl = req.headers.referer;
+    return res.status(400).render('./layouts/error.hbs', {
+        layout: "error.hbs",
+        errorMessage: 'Продолжительность должна быть числом'
+    });
+}
+
+
+if (isNaN(lock_days) || lock_days < 0 || lock_days > 7) {
+    req.session.previousUrl = req.headers.referer;
+    return res.status(400).render('./layouts/error.hbs', {
+        layout: "error.hbs",
+        errorMessage: 'Время блокировки должно быть числом от 0 до 7'
+    });
+}
+
+// Проверка, что pass_threshold находится в диапазоне от 0 до 100
+const passThreshold = parseFloat(pass_threshold);
+if (isNaN(passThreshold) || passThreshold < 0 || passThreshold > 100) {
+    req.session.previousUrl = req.headers.referer;
+    return res.status(400).render('./layouts/error.hbs', {
+        layout: "error.hbs",
+        errorMessage: 'Порог прохождения должен быть числом от 0 до 100'
+    });
+}
     
                 const existingCourse = await models.Courses.findOne({
                     where: {
@@ -329,7 +446,9 @@ class AdminController {
                         description: description,
                         other_details: details,
                         duration: duration,
+                        pass_threshold: pass_threshold,
                         course_type_id: courseType,
+                        lock_days: lock_days,
                         questions_to_show: questionsToShow || 10 // Обновляем количество вопросов
                     },
                     {
@@ -339,10 +458,10 @@ class AdminController {
     
                 if (updatedCourse[0] === 0) {
                     req.session.previousUrl = req.headers.referer;
-                    return res.render('./layouts/error.hbs', { layout: "error.hbs", errorMessage: 'Курс не найден' });
+                    return res.status(400).render('./layouts/error.hbs', { layout: "error.hbs", errorMessage: 'Курс не найден' });
                 }
     
-                res.redirect('/admin/courses');
+                res.status(200).redirect('/admin/courses');
             });
         } catch (error) {
             console.error('Ошибка при обновлении курса:', error);
@@ -366,8 +485,6 @@ class AdminController {
         await isAdmin(req, res, async () => {
             try {
                 const { courseId, questionText, correctAnswers, incorrectAnswers } = req.body;
-                console.log(correctAnswers)
-                console.log(incorrectAnswers)
                 const correctAnswers1 = JSON.parse(correctAnswers);
                 const incorrectAnswers1 = JSON.parse(incorrectAnswers);
 
@@ -426,7 +543,7 @@ class AdminController {
                 const { type_id } = req.params;
                 const { type_name, description, other_details } = req.body;
                 await models.CourseTypes.update({ type_name, description, other_details }, { where: { type_id } });
-                return res.render('./layouts/infoAdmin.hbs', { layout: "infoAdmin.hbs", message: 'Тип успешно удален' });
+                return res.render('./layouts/infoAdmin.hbs', { layout: "infoAdmin.hbs", message: 'Тип успешно обновлен' });
             });
         } catch (error) {
             console.error('Ошибка при обновлении типа курса:', error);
@@ -559,7 +676,6 @@ class AdminController {
                     video_content: videoData,
                     video_description: filename
                 });
-                console.log("Значение курса Id" + courseId)
 
                 return res.render('./layouts/infoAdmin.hbs', { layout: "infoAdmin.hbs", message: 'Видео успешно добавлено' });
             });
@@ -568,6 +684,183 @@ class AdminController {
             res.status(500).send('Произошла ошибка при загрузке видео');
         }
     }
+
+    // материалы
+
+    async deleteMaterial(req, res) {
+        try {
+            await isAdmin(req, res, async () => {
+                const { id } = req.params;
+                const material = await models.Materials.findByPk(id);
+                if (!material) {
+                    req.session.previousUrl = req.headers.referer;
+                    return res.render('./layouts/error.hbs', { layout: "error.hbs", errorMessage: 'Глава не найдена' });
+                }
+                await material.destroy();
+                return res.status(200).json({ message: 'Материал успешно удален' });
+            });
+        } catch (error) {
+            console.error('Ошибка при удалении:', error);
+            res.status(500).send('Произошла ошибка при удалении материала');
+        }
+    }
+
+    async addMaterials(req, res) {
+        try {
+            await isAdmin(req, res, async () => {
+                const { text, courseId, title, range } = req.body;
+                const existingMaterial = await models.Materials.findOne({
+                    where: {
+                        course_id: courseId,
+                        range: range
+                    }
+                });
+    
+                if (existingMaterial) {
+                    req.session.previousUrl = req.headers.referer;
+                    return res.status(400).render('./layouts/error.hbs', {
+                        layout: "error.hbs",
+                        errorMessage: 'Запись с таким course_id и range уже существует'
+                    });
+                }
+                await models.Materials.create({
+                    title: title,
+                    course_id: courseId,
+                    range: range,
+                    text: text
+                });
+    
+                res.redirect('/admin/materials');
+            });
+        } catch (error) {
+            console.error('Ошибка при добавлении материала курса:', error);
+            res.status(500).send('Произошла ошибка при добавлении материала курса');
+        }
+    }
+
+    async updateMaterial(req, res) {
+        try {
+            await isAdmin(req, res, async () => {
+                const { id } = req.params;
+                console.log("!!!!!!!!!!!!! " +  id)
+                const { material_id, title, text, range, courseId } = req.body;
+
+                const existingMaterial = await models.Materials.findOne({
+                    where: { material_id: id }
+                });
+    
+                if (!existingMaterial) {
+                    req.session.previousUrl = req.headers.referer;
+                    return res.status(404).render('./layouts/error.hbs', {
+                        layout: "error.hbs",
+                        errorMessage: 'Запись с таким material_id не найдена'
+                    });
+                }
+    
+                // Проверяем, чтобы range был уникальным для данного course_id
+                const duplicateMaterial = await models.Materials.findOne({
+                    where: {
+                        course_id: courseId,
+                        range: range,
+                        material_id: { [Op.not]: id } // Исключаем текущую запись
+                    }
+                });
+    
+                if (duplicateMaterial) {
+                    req.session.previousUrl = req.headers.referer;
+                    return res.status(400).render('./layouts/error.hbs', {
+                        layout: "error.hbs",
+                        errorMessage: 'Запись с таким course_id и range уже существует'
+                    });
+                }
+    
+                await models.Materials.update(
+                    {
+                        title: title,
+                        text: text,
+                        range: range,
+                        course_id: courseId
+                    },
+                    {
+                        where: { material_id: id }
+                    }
+                );
+    
+                res.status(200).json({ message: 'Материал успешно обновлен' });
+            });
+        } catch (error) {
+            console.error('Ошибка при обновлении материала курса:', error);
+            res.status(500).send('Произошла ошибка при обновлении материала курса');
+        }
+    }
+    
+
+    async getAllMaterials(req, res) {
+        
+        try {
+            await isAdmin(req, res, async () => {
+
+                const { courseId } = req.query;
+
+                const options = {
+                    include: [{
+                        model: models.Courses, 
+                        attributes: ['course_name', 'course_id'] // Выбираем только название курса
+                    }]
+                };
+        
+                if (courseId) {
+                    options.where = { course_id: courseId };
+                }
+        
+               // const materials = await models.Materials.findAll(options);
+    
+                const materials = await models.Materials.findAll({
+                    include: [{ model: models.Courses }],
+                    raw: true
+                });
+            
+                    const courses = await models.Courses.findAll({
+                        include: [models.CourseTypes],
+                        raw: true
+                    });
+
+                    const formattedmaterials = materials.map(materials => {
+                     return {
+                         material_id: materials.material_id,
+                         course_id: materials.course_id,
+                         title: materials.title,
+                         range: materials.range,
+                         text: materials.text,
+                        CourseId: materials['Course.course_id'],
+                        CourseName: materials['Course.course_name'],
+                        Description: materials['Course.description'],
+                        Duration: materials['Course.duration'],
+                        CourseTypeId: materials['Course.course_type_id'],
+                        OtherDetails: materials['Course.other_details']
+                         
+                     };
+                    });
+
+                res.status(200).render('./layouts/materials.hbs', {
+                    layout: 'materials.hbs', // Укажите ваш основной layout
+                    materials: formattedmaterials, // Передаем список материалов
+                    courses: courses, // Передаем список курсов для фильтрации
+                    selectedCourseId: courseId // Передаем выбранный courseId для фильтрации
+                });
+            });
+        } catch (error) {
+            console.error('Ошибка при получении списка материалов:', error);
+            res.status(500).render('./layouts/error.hbs', {
+                layout: "error.hbs",
+                errorMessage: 'Произошла ошибка при получении списка материалов'
+            });
+        }
+
+        
+
+    }
+
 
 
 }

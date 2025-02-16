@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Manage Materials</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-image: url('/background.png');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            min-height: 100vh;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        .container {
+            background-color: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+            animation: fadeIn 0.8s ease-in-out;
+            max-width: 800px;
+            width: 90%;
+            margin-top: 100px;
+            margin-bottom: 40px;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        h1, h2 {
+            color: #333;
+        }
+
+        input, select {
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+            width: 100%;
+            max-width: 300px;
+        }
+
+        .materials-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            justify-content: center;
+        }
+
+        .card {
+            background-color: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            padding: 20px;
+            text-align: left;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            min-height: 220px;
+        }
+
+        .card-actions {
+            display: flex;
+            justify-content: space-between;
+            margin-top: auto;
+        }
+
+        .btn {
+            display: inline-block;
+            background-color: #007bff;
+            color: #fff;
+            text-decoration: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            transition: background-color 0.3s ease, transform 0.2s;
+            font-size: 16px;
+            border: none;
+            cursor: pointer;
+            width: 100%;
+            text-align: center;
+        }
+
+        .btn:hover {
+            background-color: #0056b3;
+            transform: scale(1.05);
+        }
+
+        .edit-form {
+            display: none;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    {{> adminHeader}}
+    <br>
+
+    <div class="container">
+        <h1>Manage Materials</h1>
+        <h2>Add New Material</h2>
+        <form id="add-material-form" action="/admin/materials" method="post">
+            <input type="hidden" id="materialId" name="materialId">
+            <label for="title">Название:</label>
+            <input type="text" id="title" name="title" required>
+            <label for="courseId">Курс:</label>
+            <select id="courseId" name="courseId" required>
+                {{#each courses}}
+                    <option value="{{this.course_id}}">{{this.course_name}}</option>
+                {{/each}}
+            </select>
+            <label for="range">Порядок главы:</label>
+            <input type="number" id="range" name="range" required>
+            <label for="text">Текст:</label>
+            <textarea id="text" name="text" required></textarea>
+            <button type="submit" class="btn">Сохранить</button>
+        </form>
+
+        <h2>Filter by Course</h2>
+        <select id="courseFilter">
+            <option value="">Все курсы</option>
+            {{#each courses}}
+                <option value="{{this.course_id}}">{{this.course_name}}</option>
+            {{/each}}
+        </select>
+
+        <div id="materials-container" class="materials-grid">
+            {{#each materials}}
+                <div class="card" id="card-{{this.material_id}}" data-course-id="{{this.course_id}}">
+                    <h2>Название: {{this.title}}</h2>
+                    <p>{{this.text}}</p>
+                    <p>Порядковый номер: {{this.range}}</p>
+                    <p><strong>Курс:</strong> {{this.CourseName}}</p>
+
+                    <div class="card-actions">
+                        <button class="btn" onclick="showEditForm({{this.material_id}})">Edit</button>
+                        <button class="btn delete-button" data-material-id="{{this.material_id}}">Delete</button>
+                    </div>
+                    <div class="edit-form" id="edit-form-{{this.material_id}}">
+                        <form onsubmit="updateMaterial(event, {{this.material_id}})">
+                            <input type="text" name="title" value="{{this.title}}" required>
+                            <input type="number" name="range" value="{{this.range}}" required>
+                            <textarea name="text" required>{{this.text}}</textarea>
+                            <button type="submit" class="btn">Update</button>
+                            <button type="button" class="btn" onclick="hideEditForm({{this.material_id}})">Cancel</button>
+                        </form>
+                    </div>
+                </div>
+            {{/each}}
+        </div>
+    </div>
+
+    <script>
+        // Функция для фильтрации материалов по курсу
+        function filterMaterials() {
+            const selectedCourseId = document.getElementById('courseFilter').value;
+            const materials = document.querySelectorAll('.card');
+
+            materials.forEach(material => {
+                const materialCourseId = material.getAttribute('data-course-id');
+                if (selectedCourseId === "" || materialCourseId === selectedCourseId) {
+                    material.classList.remove('hidden');
+                } else {
+                    material.classList.add('hidden');
+                }
+            });
+        }
+
+        // Обработчик изменения фильтра
+        document.getElementById('courseFilter').addEventListener('change', filterMaterials);
+
+        // Функция для отображения формы редактирования
+        function showEditForm(materialId) {
+            document.getElementById(`edit-form-${materialId}`).style.display = 'block';
+        }
+
+        // Функция для скрытия формы редактирования
+        function hideEditForm(materialId) {
+            document.getElementById(`edit-form-${materialId}`).style.display = 'none';
+        }
+
+async function updateMaterial(event, materialId) {
+    event.preventDefault();
+    const formData = new FormData(event.target);
+    const data = {
+        title: formData.get('title'),
+        range: formData.get('range'),
+        text: formData.get('text'),
+        courseId: document.getElementById('courseId').value // Добавляем courseId
+    };
+
+    try {
+        const response = await fetch(`/admin/materials/${materialId}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.errorMessage || 'Ошибка при обновлении материала');
+        }
+
+        alert('Материал успешно обновлен');
+        window.location.reload();
+    } catch (error) {
+        alert(error.message);
+    }
+}
+
+       document.querySelectorAll('.delete-button').forEach(button => {
+    button.addEventListener('click', async () => {
+        const materialId = button.getAttribute('data-material-id');
+        if (confirm('Вы уверены, что хотите удалить этот материал?')) {
+            try {
+                const response = await fetch(`/admin/materials/${materialId}`, { method: 'DELETE' });
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.errorMessage || 'Ошибка при удалении материала');
+                }
+
+                alert('Материал успешно удален');
+                window.location.reload();
+            } catch (error) {
+                alert(error.message);
+            }
+        }
+    });
+});
+    </script>
+</body>
+</html>

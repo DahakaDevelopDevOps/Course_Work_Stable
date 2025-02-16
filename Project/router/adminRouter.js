@@ -12,6 +12,7 @@ adminrouter
     .get('/tasks', adminController.getTasks)
     .get('/create/question', adminController.createQuestion)
     .post('/create/question', adminController.handleCreateQuestion)
+    .get('/materials', adminController.getAllMaterials)
 
 
     // Маршруты для операций с курсами 
@@ -35,6 +36,14 @@ adminrouter
 
     //видео
     .post('/upload-video', upload.single('video'), adminController.uploadVideo)
-    .post('/delete-video/:id', adminController.deleteVideo);
+    .post('/delete-video/:id', adminController.deleteVideo)
 
+    // материал 
+    .delete('/materials/:id', adminController.deleteMaterial)
+    .post('/materials', adminController.addMaterials)
+    .put('/materials/:id', adminController.updateMaterial)
+    .get('/materials/:id', adminController.getMaterial)
+
+
+;
 module.exports = adminrouter;

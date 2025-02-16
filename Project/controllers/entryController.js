@@ -10,16 +10,16 @@ class EntryController {
             const id = req.query.courseId;
             if (!req.session.userId) {
                 req.session.returnUrl = req.originalUrl;
-                return res.redirect('/auth/login');
+                return res.status(401).redirect('/auth/login');
             }
             const admin = await models.Users.findByPk(req.session.userId);
             if(admin && admin.Role == 1){
                 req.session.previousUrl = req.headers.referer;
-                return res.render('./layouts/error.hbs', { layout: "error.hbs", errorMessage: 'Вы не можете записаться на курс' });
+                return res.status(400).render('./layouts/error.hbs', { layout: "error.hbs", errorMessage: 'Вы не можете записаться на курс' });
             }
             if(!admin){
                 req.session.previousUrl = req.headers.referer;
-                return res.render('./layouts/error.hbs', { layout: "error.hbs", errorMessage: 'Вы не можете записаться на курс' });
+                return res.status(400).render('./layouts/error.hbs', { layout: "error.hbs", errorMessage: 'Вы не можете записаться на курс' });
             }
             const data = await models.Statistics.findOne({
                 where:{
@@ -27,15 +27,46 @@ class EntryController {
                     course_id: id
                 }, raw: true
             })
-            if(data){
+
+            if( data && data.status_id == 3){
                 req.session.previousUrl = req.headers.referer;
-                return res.render('./layouts/error.hbs', { layout: "error.hbs", errorMessage: 'Вы не можете записаться на курс, уже прошли' });
+                return res.status(400).render('./layouts/error.hbs', {
+                    layout: "error.hbs",
+                    errorMessage: `Вы не можете перезаписаться на курс, коотрый уже успешно прошли`
+                });
+                }
+        
+
+            if (data && data.course_status == 0) {
+                // Проверка даты unblock_data
+                const currentDate = new Date();
+                const unblockDate = new Date(data.unblock_data);
+    
+                if (unblockDate > currentDate) {
+                    // Если дата блокировки еще не прошла
+                    req.session.previousUrl = req.headers.referer;
+                    return res.status(400).render('./layouts/error.hbs', {
+                        layout: "error.hbs",
+                        errorMessage: `Вы не можете перезаписаться на курс до ${unblockDate.toLocaleDateString()}`
+                    });
+                } else {
+                    // Если дата блокировки прошла, обновляем статус на 1
+                    await models.Statistics.update(
+                        { course_status: 1, status_id: 1 },
+                        {
+                            where: {
+                                user_id: req.session.userId,
+                                course_id: id
+                            }
+                        }
+                    );
+                }
             }
             if (id) {
                 const user = await models.Users.findByPk(req.session.userId, { raw: true });
                 const course = await models.Courses.findByPk(id, { include: [models.CourseTypes], raw: true });
                 const courses = await models.Courses.findAll({ include: [models.CourseTypes], raw: true });
-                res.render("./layouts/entry.hbs", { layout: "entry.hbs", course: course, courses: courses, user:user });
+                res.status(200).render("./layouts/entry.hbs", { layout: "entry.hbs", course: course, courses: courses, user:user });
             }
             else{
                 return res.redirect('/courses'); 
@@ -70,16 +101,12 @@ async addEntry(req, res) {
             return res.status(400).send('Вы уже записаны на этот курс');
         }
 
-        const status = await models.Status.findOne({
-            where: {
-                status_name: "inproc"
-            }
-        });
+
         const newEntry = await models.Statistics.create({
             user_id: req.session.userId, 
             course_id: courseId,
             start_date: new Date(), 
-            status_id: status.status_id 
+            status_id: 1
         });
 
         // Отправляем сообщение пользователю о записи на курс

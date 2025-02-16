@@ -135,6 +135,22 @@
             }
         }
     </style>
+     <script>
+        // Функция для форматирования дат
+        function formatDate(dateString) {
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            const date = new Date(dateString);
+            return date.toLocaleDateString('ru-RU', options); // Выводит дату в формате "день месяц год"
+        }
+
+        document.addEventListener("DOMContentLoaded", function () {
+            // Применение форматирования к датам после загрузки страницы
+            const dateElements = document.querySelectorAll('.course-card p.date');
+            dateElements.forEach(element => {
+                element.textContent = formatDate(element.textContent);
+            });
+        });
+    </script>
 </head>
 
 <body>
@@ -146,8 +162,10 @@
                 <h2>{{course_name}}</h2>
                 <p>{{description}}</p>
                 <p>Продолжительность: {{duration}} часов</p>
-                <p>Дата начала: {{start_date}}</p>
+                <p >Дата начала: {{start_date}}</p>
                 <p>Дата окончания: {{end_date}}</p>
+                <p>Ваш результат: {{percent_success}}</p>
+                <p>Заблокирован до: {{unblock_data}}</p>
             </div>
             {{/each}}
         {{else}}

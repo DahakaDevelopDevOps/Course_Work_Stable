@@ -31,7 +31,7 @@ connection
   });
 
 // Синхронизация таблиц
-connection.sync({ alter: true, force: true }) // Убедитесь, что { force: true } используется только при необходимости сброса данных.
+connection.sync({ alter: true, force: false }) // Убедитесь, что { force: true } используется только при необходимости сброса данных.
   .then(() => {
     console.log('Database synchronized successfully.');
   })

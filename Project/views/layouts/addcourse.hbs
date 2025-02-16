@@ -113,8 +113,13 @@
             <label for="details">Навыки:</label>
             <textarea id="details" name="details" required></textarea>
 
+            <label for="pass_threshold">Порог прохождения курса в (%):</label>
+            <input type="number" id="pass_threshold" name="pass_threshold" min="0" max="100" required oninput="validatePassThreshold(this)">
             <label for="duration">Продолжительность:</label>
             <input type="text" id="duration" name="duration" required pattern="^(0\.\d{1,2}[1-9]\d{0,2}|[1-9]\d{0,2}(\.\d{1,2})?|1000(\.0{1,2})?)$" title="Введите время в формате с плавающей точкой">
+
+            <label for="duration">На сколько дней становится недоступным:</label>
+            <input type="text" id="lock_days" name="lock_days" required min="0" max="7" title="Введите число от 0 до 7">
 
             <label for="courseType">Тип курса:</label>
             <select id="courseType" name="courseType" required>
@@ -131,5 +136,14 @@
         </form>
     </div>
 </body>
-
+<script>
+    function validatePassThreshold(input) {
+    const value = parseInt(input.value, 10);
+    if (isNaN(value) || value < 0 || value > 100) {
+        input.setCustomValidity('Значение должно быть от 0 до 100');
+    } else {
+        input.setCustomValidity('');
+    }
+}
+</script>
 </html>
