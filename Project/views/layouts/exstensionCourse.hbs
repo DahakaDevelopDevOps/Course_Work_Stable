@@ -130,6 +130,7 @@
             <form id="testForm">
                 <div id="tasksContainer">
                     {{#each tasks}}
+                    {{#if (lt @index ../questions_to_show)}}
                     <div class="task" data-test-id="{{this.test_id}}">
                         <h2>{{this.question_text}}</h2>
                         <ul>
@@ -143,6 +144,7 @@
                             {{/each}}
                         </ul>
                     </div>
+                    {{/if}}
                     {{/each}}
                 </div>
                 <button type="submit" id="submitButton">Отправить ответы</button>
@@ -156,6 +158,8 @@
     <script>
         let correctCount = 0;
         let totalQuestions;
+        let retryAttempted = false; // Флаг для отслеживания попытки перепройти тест
+
         document.addEventListener('DOMContentLoaded', function () {
             function shuffleArray(array) {
                 for (let i = array.length - 1; i > 0; i--) {
@@ -226,19 +230,27 @@
 
                 if (percentage >= passThreshold) {
                     finishButton.classList.remove('hidden');
+                    submitButton.disabled = true; // Блокируем кнопку "Отправить ответы"
                     if (percentage === 100) {
                         resultMessage.textContent += ' Вы прошли курс на 100%!';
                     } else {
                         resultMessage.textContent += ' Вы прошли курс!';
                     }
                 } else {
-                    retryButton.classList.remove('hidden');
-                    submitButton.disabled = true; // Делаем кнопку "Отправить ответы" недоступной
-                    resultMessage.textContent += ' Попробуйте снова.';
+                    if (!retryAttempted) {
+                        retryButton.classList.remove('hidden');
+                        submitButton.disabled = true; // Блокируем кнопку "Отправить ответы"
+                        resultMessage.textContent += ' Попробуйте снова.';
+                    } else {
+                        finishButton.classList.remove('hidden');
+                        submitButton.disabled = true; // Блокируем кнопку "Отправить ответы"
+                        resultMessage.textContent += ' Вы использовали все попытки. Курс завершен.';
+                    }
                 }
             });
 
             retryButton.addEventListener('click', function () {
+                retryAttempted = true; // Отмечаем, что попытка использована
                 document.querySelectorAll('.task').forEach(task => {
                     task.classList.remove('correct', 'incorrect');
                     task.querySelectorAll('input[type="checkbox"]').forEach(input => {
@@ -246,42 +258,39 @@
                     });
                 });
                 retryButton.classList.add('hidden');
-                finishButton.classList.add('hidden');
                 submitButton.disabled = false; // Включаем кнопку "Отправить ответы"
                 resultMessage.textContent = '';
+                correctCount = 0; // Сбрасываем счетчик правильных ответов
             });
 
             finishButton.addEventListener('click', async function () {
-    try {
-        alert('Отлично, курс завершен!');
-        let percentage = (correctCount / totalQuestions) * 100;
-        let statusId = percentage >= passThreshold ? 3 : 2;
-        let courseStatus = percentage >= passThreshold ? 1 : 0;
+                try {
+                    alert('Отлично, курс завершен!');
+                    let percentage = (correctCount / totalQuestions) * 100;
+                    let statusId = percentage >= passThreshold ? 3 : 2; // 3 - passed, 2 - failed
+                    let courseStatus = percentage >= passThreshold ? 1 : 0; // 1 - available, 0 - locked
 
-        const response = await fetch(`/profile/updateStatus/{{courseId}}`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                status_id: statusId,
-                course_status: courseStatus,
-                percent_success: percentage
-            })
-        });
+                    const response = await fetch(`/profile/updateStatus/{{courseId}}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            status_id: statusId,
+                            course_status: courseStatus,
+                            percent_success: percentage
+                        })
+                    });
 
-        if (!response.ok) {
-            throw new Error('Ошибка при обновлении статуса курса');
-        }
-window.location.href = "/profile";
-    } catch (error) {
-        console.error('Ошибка:', error);
-        alert('Произошла ошибка, попробуйте снова.');
-    }
-});
-
-
-            
+                    if (!response.ok) {
+                        throw new Error('Ошибка при обновлении статуса курса');
+                    }
+                    window.location.href = "/profile";
+                } catch (error) {
+                    console.error('Ошибка:', error);
+                    alert('Произошла ошибка, попробуйте снова.');
+                }
+            });
         });
     </script>
 </body>

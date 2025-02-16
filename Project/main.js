@@ -17,6 +17,9 @@ const hbs = require('express-handlebars').create({
             const seconds = String(date.getSeconds()).padStart(2, '0');
             return `${hours}:${minutes}:${seconds}`;
         },
+        lt: function (a, b) {
+            return a < b;
+          },
         
             eq: (a, b) => a === b, // Хелпер для сравнения значений
         

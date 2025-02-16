@@ -6,7 +6,6 @@ class EntryController {
     async getEntry(req, res) {
         try {
             const user = req.session.id;
-            console.log(user)
             const id = req.query.courseId;
             if (!req.session.userId) {
                 req.session.returnUrl = req.originalUrl;
@@ -28,13 +27,21 @@ class EntryController {
                 }, raw: true
             })
 
+            if( data && data.status_id == 1){
+                req.session.previousUrl = req.headers.referer;
+                return res.status(400).render('./layouts/error.hbs', {
+                    layout: "error.hbs",
+                    errorMessage: `Вы не можете перезаписаться на курс, на который уже записаны`
+                });
+            }
+
             if( data && data.status_id == 3){
                 req.session.previousUrl = req.headers.referer;
                 return res.status(400).render('./layouts/error.hbs', {
                     layout: "error.hbs",
-                    errorMessage: `Вы не можете перезаписаться на курс, коотрый уже успешно прошли`
+                    errorMessage: `Вы не можете перезаписаться на курс, который уже успешно прошли`
                 });
-                }
+            }
         
 
             if (data && data.course_status == 0) {
@@ -97,17 +104,30 @@ async addEntry(req, res) {
                 course_id: courseId
             }
         });
-        if (existingEntry) {
-            return res.status(400).send('Вы уже записаны на этот курс');
+        if ( existingEntry && existingEntry.course_status == 0) {
+            return res.status(400).send('Вы уже были записаны на этот курс. Он недоступен');
         }
-
-
-        const newEntry = await models.Statistics.create({
+        if (existingEntry && existingEntry.unblock_data) {
+            await models.Statistics.update(
+                { course_status: 1, status_id: 1  },
+                {
+                    where: {
+                        user_id: req.session.userId,
+                        course_id: courseId
+                    }
+                }
+            );
+        }
+        else{
+            await models.Statistics.create({
             user_id: req.session.userId, 
             course_id: courseId,
             start_date: new Date(), 
             status_id: 1
-        });
+        });}
+
+
+
 
         // Отправляем сообщение пользователю о записи на курс
         const transporter = nodemailer.createTransport({

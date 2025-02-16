@@ -167,13 +167,26 @@ class ProfileController {
             const courseRes = await models.Courses.findByPk(courseId);
 
             const materialsDetails = await models.Materials.findAll({
-                where: { course_id: courseId }
-            })
+                where: { course_id: courseId },
+                include: { model: models.Courses },
+                order: [['range', 'ASC']] // Сортировка по возрастанию
+            });
 
             if (tasksDetails.length < 1) {
                 req.session.previousUrl = req.headers.referer;
                 return res.status(400).render('./layouts/error.hbs', { layout: "error.hbs", errorMessage: 'Извиняемся, пока курс в доработке' });
             }
+
+            
+ // Ограничение количества вопросов
+ const course = await models.Courses.findByPk(courseId);
+ const questionsToShow = course.questions_to_show || tasksDetails.length; // Если questions_to_show не задан, показываем все вопросы
+ const limitedTasks = tasksDetails.slice(0, questionsToShow);
+
+ if (limitedTasks.length < 1) {
+     req.session.previousUrl = req.headers.referer;
+     return res.render('./layouts/error.hbs', { layout: "error.hbs", errorMessage: 'Извиняемся, пока курс в доработке' });
+ }
 
             const tasks = tasksDetails.map(detail => {
                 return {
